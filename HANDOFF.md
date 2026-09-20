@@ -35,9 +35,48 @@ the faults:
 - The `#vig` vignette is doing double duty: tunnel darkness, and keeping the lit walls from
   competing with body text. It lifts as you emerge.
 
+### Added in the realism pass
+
+The bore is no longer a straight extrusion, and the light string is no longer uniform. Both
+carry their own constraints:
+
+- **`bendX` / `bendY` must stay harmonics of `TAU/WRAP`.** The camera wraps every 84 m, so
+  any term whose period does not divide 84 makes the loop seam. Amplitudes also stay well
+  inside `W` (3.2): swing the centreline further and the bore occludes the portal glow, which
+  kills the daylight finale.
+- **Anything running the length of the tunnel must be built along the same bend.** Rails,
+  conduit, cable and the water surface are all `runCurve`/strip geometry for this reason. A
+  straight `BoxGeometry` or a flat `PlaneGeometry` cannot follow the centreline — that is why
+  the water stopped being a plane slid along under the camera.
+- **Lamp character is keyed to the absolute unit number `n`, never the recycled slot `i`.**
+  Key it to the slot and the dead tube appears to hop between fittings as the string scrolls.
+- **The lamp level multiplier is capped at 1.0.** Intensity is `1.3 * lvl`, so the exposure
+  ceiling above still holds. Do not let `lvl` exceed 1.
+- **Flicker is off under `prefers-reduced-motion`.** It is a brightness oscillation on a large
+  light source; it must stay behind that check.
+- **Wall marks ride their own geometry, not the lining texture.** The texture tiles every 6 m,
+  so a distinctive mark baked into it repeats every 6 m and reads as wallpaper. They repeat at
+  `WRAP` instead, which is past the fog. Three copies cover the view; a fourth is never drawn.
+- **Mark planes face `-sd * PI/2`.** Same lesson as `DoubleSide` on the bore: get this sign
+  wrong and the normals face out of the tunnel, so every mark is lit from behind and renders
+  black. It is the easiest mistake to make twice.
+- **Marks sit at y 1.3-2.5, not at true working height.** The point lights are at the
+  springing and the bottom of the wall is the darkest band in the bore. Placed realistically
+  low, they simply disappear.
+- **Cable sag span (6) must divide `WRAP`,** and the curve needs roughly eight samples per
+  span or the catenary renders as a visible zigzag. That is why it samples at 480 while the
+  rigid runs sample at 150.
+- Marks are deliberately abstract: survey crosses, tallies, paint daubs, a struck-off band.
+  No names, dates or initials. This is a documentary book about real people on a real scheme,
+  and invented crew marks would be invented history. Real ones from Gillian's research drop
+  straight into `markArt`.
+
 ## Constraints
 
 - three.js r128 loads from cdnjs. If the host's CSP blocks it, vendor the file locally.
+  To test offline, `npm pack three@0.128.0` and serve `package/build/three.min.js` in its
+  place — the build is identical to the CDN copy, and it lets you screenshot the tunnel
+  without network access.
 - Everything else is inline. Images are base64 data URIs — replace with real files once there
   is a repo.
 
