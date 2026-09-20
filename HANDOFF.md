@@ -31,7 +31,14 @@ the faults:
 - **`WRAP = 84`** must stay a common multiple of the fitting spacing (6) and the texture tile
   (6), or the loop seams visibly.
 - **Pixel ratio capped** at 1.6 on narrow viewports. Eight point lights on a standard material
-  is the expensive part; if it stutters on older phones, cut lights before cutting resolution.
+  is the expensive part; if it stutters on older phones, cut antialiasing first, then lights,
+  then resolution.
+- **`antialias: true` on the renderer is load-bearing, not decoration.** The handrails are the
+  thinnest lit geometry on the page, and without it round pipe breaks into a dashed hairline
+  at middle distance and stops reading as steel. It measured about 21% of frame rate under
+  software rasterisation, which badly overstates the real cost because MSAA is hardware
+  accelerated on any actual GPU. It is still the first thing to turn off if an old device
+  struggles.
 - The `#vig` vignette is doing double duty: tunnel darkness, and keeping the lit walls from
   competing with body text. It lifts as you emerge.
 
