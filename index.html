@@ -478,14 +478,49 @@ var water = new THREE.Mesh(buildWater(),
 );
 scene.add(water);
 
+/* Everything that runs the length of the tunnel has to be visibly held up by
+   something, or it reads as free-standing wire strung through the dark. The
+   fixings below are what make the runs read as installed rather than floating.
+   FIX_STEP must divide WRAP (84/3 = 28) like every other repeating element. */
+var FIX_STEP = 3;
+
+/* one draw call per fixing type rather than a hundred meshes */
+function fixingsAlong(geo, mat, place){
+  var slots=[], z, i, m4=new THREE.Matrix4();
+  for(z=0; z>=-LEN; z-=FIX_STEP) place(slots, z);
+  var im = new THREE.InstancedMesh(geo, mat, slots.length);
+  for(i=0;i<slots.length;i++){
+    m4.makeTranslation(slots[i][0], slots[i][1], slots[i][2]);
+    im.setMatrixAt(i, m4);
+  }
+  im.instanceMatrix.needsUpdate = true;
+  /* an InstancedMesh takes its bounding sphere from the base geometry, which
+     here is one small post at the origin, so leaving culling on drops the lot */
+  im.frustumCulled = false;
+  return im;
+}
+
 /* handrails either side of the channel. Round pipe on a bent path rather than
    a straight box: it is both what is actually down there and the only thing
    that can follow the centreline. */
 var steel = new THREE.MeshStandardMaterial({color:0x3f4548, roughness:0.68, metalness:0.2});
 [-1,1].forEach(function(sg){
-  scene.add(new THREE.Mesh(new THREE.TubeGeometry(runCurve(sg*(CH+0.1),1.02,0,1),160,0.028,6,false), steel));
-  scene.add(new THREE.Mesh(new THREE.TubeGeometry(runCurve(sg*(CH+0.1),0.52,0,1),160,0.023,6,false), steel));
+  scene.add(new THREE.Mesh(new THREE.TubeGeometry(runCurve(sg*(CH+0.1),1.02,0,1),160,0.032,6,false), steel));
+  scene.add(new THREE.Mesh(new THREE.TubeGeometry(runCurve(sg*(CH+0.1),0.52,0,1),160,0.026,6,false), steel));
 });
+
+/* the stanchions that carry them, on both sides, with a foot plate bolted to
+   the walkway. Without these the rail is just a line hanging in mid-air. */
+scene.add(fixingsAlong(new THREE.CylinderGeometry(0.030,0.034,1.02,6), steel,
+  function(slots,z){
+    slots.push([-(CH+0.1)+bendX(z), 0.51+bendY(z), z]);
+    slots.push([ (CH+0.1)+bendX(z), 0.51+bendY(z), z]);
+  }));
+scene.add(fixingsAlong(new THREE.CylinderGeometry(0.082,0.082,0.028,6), steel,
+  function(slots,z){
+    slots.push([-(CH+0.1)+bendX(z), 0.014+bendY(z), z]);
+    slots.push([ (CH+0.1)+bendX(z), 0.014+bendY(z), z]);
+  }));
 
 /* orange service conduit clipped to the left wall */
 scene.add(new THREE.Mesh(
@@ -493,11 +528,17 @@ scene.add(new THREE.Mesh(
   new THREE.MeshStandardMaterial({color:0x8a4a1e, roughness:0.85})));
 
 /* and beneath it a cable that was hung by hand: it sags between its clips.
-   The clip span divides WRAP (84/6=14) so the sag pattern meets itself at the
-   loop. Nothing else on the page hangs, and hanging is what reads as human. */
+   Clip span is FIX_STEP so the low point of every sag falls midway between
+   two straps and the cable meets the wall exactly where a strap holds it. */
 scene.add(new THREE.Mesh(
-  new THREE.TubeGeometry(runCurve(-W+0.14,1.79,0.17,6,480),420,0.019,5,false),
+  new THREE.TubeGeometry(runCurve(-W+0.12,1.79,0.09,FIX_STEP,480),420,0.019,5,false),
   new THREE.MeshStandardMaterial({color:0x15181a, roughness:0.95})));
+
+/* the straps that carry both: a vertical plate off the lining, passing behind
+   the conduit and the cable at every clip position */
+scene.add(fixingsAlong(new THREE.BoxGeometry(0.115,0.30,0.045),
+  new THREE.MeshStandardMaterial({color:0x35393b, roughness:0.9, metalness:0.15}),
+  function(slots,z){ slots.push([-W+0.052+bendX(z), 1.87+bendY(z), z]); }));
 
 /* ---------- marks left on the lining ----------
    Abstract only: survey crosses, tally ticks, paint daubs, a struck-off band.

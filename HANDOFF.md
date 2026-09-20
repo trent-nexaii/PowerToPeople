@@ -63,7 +63,16 @@ carry their own constraints:
 - **Marks sit at y 1.3-2.5, not at true working height.** The point lights are at the
   springing and the bottom of the wall is the darkest band in the bore. Placed realistically
   low, they simply disappear.
-- **Cable sag span (6) must divide `WRAP`,** and the curve needs roughly eight samples per
+- **Every long run needs visible fixings or it reads as free-standing wire.** The handrails
+  carry stanchions and foot plates; the conduit and cable are strapped to the lining. This is
+  what stops round pipe on a bent path from looking like string hung through the dark, and it
+  is the reason the rail is pipe-thick rather than hairline. `FIX_STEP` (3) must divide `WRAP`
+  like everything else, and the cable's clip span is `FIX_STEP` so each sag bottoms out
+  midway between two straps.
+- **The fixings are `InstancedMesh` with `frustumCulled = false`.** An InstancedMesh takes its
+  bounding sphere from the base geometry - here one small post at the origin - so leaving
+  culling on makes the whole set vanish. They cost one draw call each.
+- **Cable sag span must divide `WRAP`,** and the curve needs roughly eight samples per
   span or the catenary renders as a visible zigzag. That is why it samples at 480 while the
   rigid runs sample at 150.
 - Marks are deliberately abstract: survey crosses, tallies, paint daubs, a struck-off band.
