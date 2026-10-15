@@ -6,19 +6,19 @@ The whole site is three things:
 
 ```
 index.html          the page (all styling and script are inside this one file)
-images/cover.jpg    book cover (portrait, about 2:3)
+images/cover.jpg    book cover (portrait)
 images/crew.jpg     historical construction photo (landscape)
-images/author.jpg   author portrait (square)
+images/author.jpg   author portrait (portrait or square)
 README.md           this file
 ```
 
 To look at it, double-click `index.html` and it opens in your web browser. No installation is needed.
 
-The three images are plain coloured blocks for now, so the layout can be seen before the real photos are added.
+The three images were taken from the sell sheet PDF, so the page already shows the real cover, the Moawhango Dam crew photo and the author's portrait. If you have larger originals (the versions sent to the printer, for example), swap them in using the steps below and the page will look sharper on big screens.
 
 ---
 
-## 1. Replacing the three images
+## 1. Replacing the three images (optional)
 
 1. Get each photo as a JPEG file (the file name ends in `.jpg`).
 2. Rename the files exactly as below, including lower-case letters:
@@ -30,9 +30,9 @@ The three images are plain coloured blocks for now, so the layout can be seen be
 
 Nothing in `index.html` needs to change. Tips:
 
-- **Cover:** a portrait image, about 2 wide to 3 tall (for example 800 × 1200 pixels).
-- **Crew photo:** a landscape image, about 16 wide to 10 tall (for example 1600 × 1000 pixels). Other shapes still work; the edges are trimmed to fit.
-- **Author photo:** a square image (for example 800 × 800 pixels). It is shown as a circle, so keep the face near the middle.
+- **Cover:** a portrait image, about 2 wide to 3 tall (for example 1000 × 1430 pixels).
+- **Crew photo:** a landscape image, about 4 wide to 3 tall (for example 1600 × 1200 pixels). Other shapes still work; the edges are trimmed to fit.
+- **Author photo:** a portrait or square image (for example 800 × 1040 pixels). The top of the picture is kept, so the face should be in the upper part.
 - Keep each file under about 500 KB so the page loads quickly on phones. Any photo editor or free online tool can "resize" or "compress" a JPEG.
 - If you want to change the caption under the construction photo, open `index.html` in a plain text editor (Notepad on Windows, TextEdit on Mac), search for `<figcaption>`, and change the sentence between `<figcaption>` and `</figcaption>`.
 
