@@ -42,11 +42,13 @@ Nothing in `index.html` needs to change. Tips:
 
 Right now the form shows the thank-you message but does not send the address anywhere, so it can be previewed safely. To actually collect addresses, choose **one** of these two free services.
 
+The address that receives the sign-ups is never written into the page. It lives only inside your Formspree or Netlify account, so visitors cannot see it, and it stays out of these files too.
+
 ### Option A — Formspree (simplest, works with any hosting)
 
-1. Go to <https://formspree.io> and create a free account.
-2. Click **New form**, give it a name such as "Power to the People notifications", and enter the email address where you want to receive sign-ups.
-3. Formspree shows you the form's address. It looks like `https://formspree.io/f/abcdwxyz`. Copy it.
+1. Go to <https://formspree.io> and create a free account. Sign up with the email address that should receive the sign-ups, or add that address later under **Settings → Email**. Formspree sends a confirmation message to it, so you need to be able to open that inbox.
+2. Click **New form**, give it a name such as "Power to the People notifications", and choose the address that should receive sign-ups as the form's recipient.
+3. Formspree shows you the form's address. It looks like `https://formspree.io/f/abcdwxyz`. Copy it. This is a random code, not your email address, so it is safe to put in the page.
 4. Open `index.html` in a plain text editor and find this line (it is near the bottom):
 
    ```
@@ -59,7 +61,8 @@ Right now the form shows the thank-you message but does not send the address any
    const FORM_ENDPOINT = "https://formspree.io/f/abcdwxyz";
    ```
 
-6. Save the file. Every sign-up now arrives in your inbox and in your Formspree account.
+6. Save the file. Every sign-up now arrives in the recipient's inbox with the subject "New sign-up for Power to the People", and is also listed in your Formspree account. The free plan allows 50 sign-ups a month; paid plans allow more.
+7. The first time a real address is submitted, Formspree may email the recipient asking them to confirm they want to receive the form. Click the link in that message once.
 
 ### Option B — Netlify Forms (only if you host on Netlify, see below)
 
@@ -75,7 +78,8 @@ Right now the form shows the thank-you message but does not send the address any
    <form id="notify-form" name="notify" data-netlify="true" netlify-honeypot="bot-field" method="post" action="#" novalidate>
    ```
 
-3. Save the file and publish it to Netlify. Sign-ups then appear under **Forms** in your Netlify site dashboard, and Netlify can email you each one.
+3. Save the file and publish it to Netlify. Sign-ups then appear under **Forms** in your Netlify site dashboard.
+4. To have each sign-up emailed, open **Site configuration → Forms → Form notifications**, choose **Email notification**, and enter the address that should receive them. The address is stored in Netlify, not in the page.
 
 Either way, the form already includes a hidden "honeypot" field that catches most automated spam, so no CAPTCHA is needed.
 

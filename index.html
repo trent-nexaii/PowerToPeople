@@ -721,8 +721,11 @@
           });
         } else {
           // Formspree (and most similar services): post the form as JSON-accepting multipart.
+          // The address that receives these is set inside the Formspree account,
+          // so it never appears in this page.
           var data = new FormData();
           data.append("email", value);
+          data.append("_subject", "New sign-up for Power to the People");
           request = fetch(FORM_ENDPOINT, {
             method: "POST",
             headers: { "Accept": "application/json" },
