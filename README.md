@@ -9,6 +9,7 @@ index.html          the page (all styling and script are inside this one file)
 images/cover.jpg    book cover (portrait)
 images/crew.jpg     historical construction photo (landscape)
 images/author.jpg   author portrait (portrait or square)
+apps-script/Code.gs the small script that emails each sign-up to you (see section 2)
 README.md           this file
 ```
 
@@ -40,33 +41,56 @@ Nothing in `index.html` needs to change. Tips:
 
 ## 2. Setting up the email sign-up form
 
-Right now the form shows the thank-you message but does not send the address anywhere, so it can be previewed safely. To actually collect addresses, choose **one** of these two free services.
+Right now the form shows the thank-you message but does not send the address anywhere, so it can be previewed safely.
 
-The address that receives the sign-ups is never written into the page. It lives only inside your Formspree or Netlify account, so visitors cannot see it, and it stays out of these files too.
+To receive sign-ups, the page needs somewhere to send them. The recommended way uses a small script inside a Google account: each sign-up is emailed to the address you choose and added to a Google Sheet, so you also have a list to write to when the book launches. The receiving address is stored in the script on Google's side. It is never written into the page or into these files, so visitors cannot see it.
 
-### Option A — Formspree (simplest, works with any hosting)
+You need a Google account (a Gmail address, or any account you use for Google Drive). It takes about ten minutes.
 
-1. Go to <https://formspree.io> and create a free account. Sign up with the email address that should receive the sign-ups, or add that address later under **Settings → Email**. Formspree sends a confirmation message to it, so you need to be able to open that inbox.
-2. Click **New form**, give it a name such as "Power to the People notifications", and choose the address that should receive sign-ups as the form's recipient.
-3. Formspree shows you the form's address. It looks like `https://formspree.io/f/abcdwxyz`. Copy it. This is a random code, not your email address, so it is safe to put in the page.
-4. Open `index.html` in a plain text editor and find this line (it is near the bottom):
+### Option A — Google Sheet and script (recommended, works with any hosting)
 
-   ```
-   const FORM_ENDPOINT = "REPLACE_ME";
-   ```
-
-5. Replace `REPLACE_ME` with the address you copied, keeping the quotation marks:
+1. Go to <https://sheets.google.com>, sign in, and click the **+** to create a blank spreadsheet. Name it something like "Power to the People sign-ups". This sheet will hold the list.
+2. In the spreadsheet's menu, click **Extensions**, then **Apps Script**. A new tab opens showing a code editor with a few lines in it.
+3. Delete those lines. Open the file `apps-script/Code.gs` from this folder in a plain text editor (Notepad on Windows, TextEdit on Mac), select everything, copy it, and paste it into the code editor.
+4. Near the top of the pasted code, find this line:
 
    ```
-   const FORM_ENDPOINT = "https://formspree.io/f/abcdwxyz";
+   var RECIPIENT = "PUT_THE_RECEIVING_EMAIL_ADDRESS_HERE";
    ```
 
-6. Save the file. Every sign-up now arrives in the recipient's inbox with the subject "New sign-up for Power to the People", and is also listed in your Formspree account. The free plan allows 50 sign-ups a month; paid plans allow more.
-7. The first time a real address is submitted, Formspree may email the recipient asking them to confirm they want to receive the form. Click the link in that message once.
+   Replace the words between the quotes with the email address that should receive the sign-ups. Keep the quotes.
+5. Click the **save** icon (or press Ctrl+S / Cmd+S).
+6. Click the blue **Deploy** button at the top right, then **New deployment**.
+7. Click the gear icon next to "Select type" and choose **Web app**. Fill in:
+   - Description: anything, for example "Sign-up form".
+   - Execute as: **Me**.
+   - Who has access: **Anyone**. (This lets the web page send to it. Nobody can read the sheet or your address through it.)
+8. Click **Deploy**. Google asks you to authorise the script: choose your account, and if it shows a warning that the app isn't verified, click **Advanced**, then **Go to … (unsafe)**, then **Allow**. This warning appears because you wrote the script yourself; it is yours.
+9. Google now shows a **Web app URL** that begins with `https://script.google.com/macros/s/` and ends in `/exec`. Click **Copy**.
+10. Open `index.html` in a plain text editor and find this line near the bottom:
+
+    ```
+    const FORM_ENDPOINT = "REPLACE_ME";
+    ```
+
+    Replace `REPLACE_ME` with the URL you copied, keeping the quotation marks:
+
+    ```
+    const FORM_ENDPOINT = "https://script.google.com/macros/s/AKfycb.../exec";
+    ```
+
+11. Save the file and publish it (section 3). Test it by entering your own email address on the page. Within a minute you should receive a message with the subject "New sign-up for Power to the People", and a new row appears in the spreadsheet under a tab called "Sign-ups".
+
+Notes:
+
+- The URL you pasted is a random code. It does not contain your email address.
+- A Google account can send about 100 messages a day this way, which is plenty for sign-ups.
+- If you ever change the code in the script, you must click **Deploy → Manage deployments**, choose the pencil icon, set Version to **New version**, and click **Deploy** again. The URL stays the same.
+- To also send each person a short confirmation email, change `SEND_CONFIRMATION = false` to `true` in the script and redeploy as above.
 
 ### Option B — Netlify Forms (only if you host on Netlify, see below)
 
-1. In `index.html`, change the line to:
+1. In `index.html`, change the endpoint line to:
 
    ```
    const FORM_ENDPOINT = "NETLIFY";

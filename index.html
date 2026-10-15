@@ -405,8 +405,9 @@
     }
     .form-panel .btn[disabled] { cursor: default; }
 
-    .thanks { font-size: 1.15rem; }
+    .thanks { font-size: 1.1rem; }
     .thanks h3 { font-size: 1.6rem; color: var(--green); margin-bottom: 0.4em; }
+    .thanks .small { font-size: 0.95rem; margin-top: 1rem; }
     [hidden] { display: none !important; }
 
     /* Honeypot: hidden from people, present for spam robots. */
@@ -583,7 +584,9 @@
 
             <div class="thanks" id="thanks" hidden tabindex="-1">
               <h3>Thank you</h3>
-              <p>We've got your email address. We'll be in touch when <em>Power to the People</em> is available to order, and not before.</p>
+              <p>Your address has been added to the list.</p>
+              <p>You will receive one email when <em>Power to the People</em> is ready to order in October 2026, with a link to the Spinning Plates Press website. There is nothing else to do for now.</p>
+              <p class="small">Entered the wrong address? Reload this page and sign up again.</p>
             </div>
           </div>
           <div class="signup-cover">
@@ -619,15 +622,16 @@
     // ==================================================================
     //  FORM ENDPOINT — the one thing to set up.
     //
-    //  Formspree (recommended, works out of the box):
-    //    1. Create a free form at https://formspree.io
-    //    2. Copy the form's endpoint, e.g. "https://formspree.io/f/abcdwxyz"
-    //    3. Paste it between the quotes below.
+    //  Google Apps Script (recommended, no third-party form service):
+    //    Follow README.md section 2. It gives you a web app address like
+    //    "https://script.google.com/macros/s/AKfycb.../exec".
+    //    Paste it between the quotes below. The receiving email address is
+    //    set inside the script, on Google's side, never in this page.
     //
     //  Netlify Forms (if the site is hosted on Netlify):
-    //    1. Set FORM_ENDPOINT to "NETLIFY"
-    //    2. Add  name="notify" data-netlify="true" netlify-honeypot="bot-field"
-    //       to the <form> tag above.
+    //    Set FORM_ENDPOINT to "NETLIFY" and add
+    //    name="notify" data-netlify="true" netlify-honeypot="bot-field"
+    //    to the <form> tag above.
     //
     //  While it is still "REPLACE_ME" nothing is sent anywhere, but the
     //  thank-you message is shown so the page can be previewed.
@@ -720,21 +724,25 @@
             body: body.toString()
           });
         } else {
-          // Formspree (and most similar services): post the form as JSON-accepting multipart.
-          // The address that receives these is set inside the Formspree account,
-          // so it never appears in this page.
+          // Google Apps Script web app (or any endpoint that accepts a plain
+          // form post). Sent as a simple form post so the browser needs no
+          // extra permission from the server.
           var data = new FormData();
           data.append("email", value);
-          data.append("_subject", "New sign-up for Power to the People");
-          request = fetch(FORM_ENDPOINT, {
-            method: "POST",
-            headers: { "Accept": "application/json" },
-            body: data
-          });
+          data.append("bot-field", "");
+          request = fetch(FORM_ENDPOINT, { method: "POST", body: data });
         }
 
         request.then(function (response) {
           if (!response.ok) throw new Error("Server responded " + response.status);
+          // Apps Script answers with JSON; Netlify answers with a page.
+          var type = response.headers.get("content-type") || "";
+          if (type.indexOf("json") !== -1) {
+            return response.json().then(function (result) {
+              if (result && result.ok === false) throw new Error(result.error || "rejected");
+            });
+          }
+        }).then(function () {
           showThanks();
         }).catch(function () {
           button.disabled = false;
