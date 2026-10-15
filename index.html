@@ -23,19 +23,17 @@
       --white: #FFFFFF;   /* white: text on green                            */
     }
 
-    /* ---------- Reset and base ---------- */
+    /* ---------- Base ---------- */
     *, *::before, *::after { box-sizing: border-box; }
 
     html {
-      font-size: 18px;                 /* mobile base size */
+      font-size: 18px;                 /* phones */
       -webkit-text-size-adjust: 100%;
       background: var(--paper);
     }
     @media (min-width: 768px) {
-      html { font-size: 20px; }        /* desktop and tablet base size */
+      html { font-size: 20px; }        /* tablets and desktops */
     }
-    /* Smooth scrolling for the "jump to form" button only; off when the
-       reader has asked their device to reduce motion. */
     @media (prefers-reduced-motion: no-preference) {
       html { scroll-behavior: smooth; }
     }
@@ -51,101 +49,99 @@
       overflow-wrap: break-word;
     }
 
-    img {
-      display: block;
-      max-width: 100%;
-      height: auto;
-    }
+    img { display: block; max-width: 100%; height: auto; }
 
     p { margin: 0 0 1.1em; }
     p:last-child { margin-bottom: 0; }
 
-    /* ---------- Headings ---------- */
     h1, h2, h3 {
       font-family: "Oswald", "Arial Narrow", Impact, sans-serif;
       font-weight: 700;
-      line-height: 1.1;
-      margin: 0 0 0.5em;
+      line-height: 1.05;
+      margin: 0 0 0.55em;
       text-transform: uppercase;
-      letter-spacing: 0.01em;
     }
-    h1 {
-      font-size: 2.6rem;
-      color: var(--yellow);
-      margin-bottom: 0.3em;
-    }
-    h2 {
-      font-size: 1.9rem;
-      color: var(--green);
-    }
+    h1 { font-size: 2.75rem; color: var(--yellow); letter-spacing: 0.01em; }
+    h2 { font-size: 1.9rem; color: var(--green); }
     @media (min-width: 768px) {
-      h1 { font-size: 3.6rem; }
-      h2 { font-size: 2.2rem; }
+      h1 { font-size: 3.8rem; }
+      h2 { font-size: 2.3rem; }
     }
     @media (min-width: 1100px) {
-      h1 { font-size: 4.2rem; }
+      h1 { font-size: 4.5rem; }
     }
 
-    /* ---------- Layout helpers ---------- */
-    .wrap {
-      width: 100%;
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 0 1.25rem;
-    }
-    @media (min-width: 768px) {
-      .wrap { padding: 0 2rem; }
-    }
-
-    /* Keeps running text to roughly 70 characters per line. */
-    .measure { max-width: 70ch; }
-
-    section, .hero, footer {
-      padding: 3.5rem 0;
-    }
-    @media (min-width: 768px) {
-      section, .hero, footer { padding: 5rem 0; }
-    }
-
-    /* Dark green bands with white text. */
-    .band {
-      background: var(--green);
-      color: var(--white);
-    }
-    .band h2 { color: var(--white); }
-    .band h2::before { background: var(--yellow); }
-
-    /* ---------- Links ---------- */
     a {
       color: var(--green);
       text-decoration: underline;
-      text-decoration-thickness: 2px;
+      text-decoration-thickness: 1.5px;
       text-underline-offset: 3px;
     }
     .band a { color: var(--white); }
 
-    /* ---------- Focus states (keyboard users) ---------- */
     :focus { outline: none; }
-    :focus-visible {
-      outline: 4px solid var(--ink);
-      outline-offset: 3px;
+    :focus-visible { outline: 4px solid var(--ink); outline-offset: 3px; }
+    .band :focus-visible, .btn:focus-visible { outline: 4px solid var(--yellow); outline-offset: 3px; }
+    .form-panel :focus-visible { outline-color: var(--ink); }
+
+    /* ---------- Page grid ----------
+       A 12-column page, 1120px wide at most. Section labels sit in the
+       left margin column on wide screens, the way a report numbers its
+       parts; on phones they stack above the text. */
+    .page {
+      width: 100%;
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 0 1.25rem;
     }
-    .band :focus-visible,
-    .btn:focus-visible {
-      outline: 4px solid var(--yellow);
-      outline-offset: 3px;
+    @media (min-width: 768px) { .page { padding: 0 2.5rem; } }
+
+    .part {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 1rem 3rem;
     }
-    /* Inside the light form card the dark ring is the visible one. */
-    .form-card :focus-visible {
-      outline-color: var(--ink);
+    @media (min-width: 900px) {
+      .part { grid-template-columns: 9rem minmax(0, 1fr); }
     }
+
+    .label {
+      font-family: "Oswald", "Arial Narrow", Impact, sans-serif;
+      font-weight: 500;
+      font-size: 1rem;
+      line-height: 1.3;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--green);
+      padding-top: 0.45rem;
+      border-top: 3px solid var(--green);
+    }
+    .label .num {
+      display: block;
+      font-weight: 700;
+      font-size: 2rem;
+      letter-spacing: 0;
+      line-height: 1;
+      margin-bottom: 0.3rem;
+    }
+    .band .label { color: var(--white); border-top-color: var(--yellow); }
+
+    /* The text column: roughly 70 characters wide. */
+    .measure { max-width: 70ch; }
+
+    section, footer { padding: 3.25rem 0; }
+    @media (min-width: 768px) { section, footer { padding: 4.5rem 0; } }
+    .rule-top { border-top: 1px solid var(--green); }
+
+    .band { background: var(--green); color: var(--white); }
+    .band h2 { color: var(--white); }
 
     /* ---------- Buttons ---------- */
     .btn {
       display: inline-block;
       width: 100%;
       min-height: 56px;
-      padding: 0.8rem 1.75rem;
+      padding: 0.8rem 1.6rem;
       font-family: "Source Sans 3", "Helvetica Neue", Arial, sans-serif;
       font-size: 1.15rem;
       font-weight: 700;
@@ -155,101 +151,89 @@
       color: var(--white);
       background: var(--green);
       border: 3px solid var(--white);
-      border-radius: 6px;
+      border-radius: 2px;
       cursor: pointer;
     }
     .btn:hover { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 4px; }
-    @media (min-width: 600px) {
-      .btn { width: auto; min-width: 20rem; }
-    }
-    /* On the light page the button needs no white edge. */
-    .on-light .btn { border-color: var(--green); }
-
-    /* Short yellow rule above every section heading. */
-    h2::before {
-      content: "";
-      display: block;
-      width: 3.5rem;
-      height: 6px;
-      background: var(--yellow);
-      margin-bottom: 0.6rem;
-    }
+    @media (min-width: 600px) { .btn { width: auto; min-width: 19rem; } }
 
     /* ================================================================
-       1. HERO
+       1. TITLE PAGE
        ================================================================ */
     .hero {
       background: var(--green);
       color: var(--white);
-      padding-bottom: 3rem;
+      padding: 2.5rem 0 3rem;
     }
+    @media (min-width: 768px) { .hero { padding: 4rem 0 4.5rem; } }
+
     .hero-grid {
       display: grid;
       gap: 2.5rem;
-      align-items: center;
+      align-items: end;
+    }
+    @media (min-width: 768px) {
+      .hero-grid { grid-template-columns: minmax(0, 1fr) minmax(240px, 32%); gap: 4rem; }
+      .hero-cover { order: 2; justify-self: end; }
+      .hero-text  { order: 1; }
+    }
+
+    .kicker {
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin: 0 0 1.5rem;
+      padding-bottom: 0.6rem;
+      border-bottom: 1px solid var(--white);
+      max-width: 70ch;
     }
     .hero-cover {
-      width: min(70%, 280px);
-      padding: 0.75rem 1.25rem 1.25rem 0;
+      width: min(62%, 240px);
     }
+    @media (min-width: 768px) { .hero-cover { width: 100%; max-width: 340px; } }
     .hero-cover img {
       width: 100%;
       aspect-ratio: 661 / 943;
       object-fit: cover;
       background: var(--paper);
-      box-shadow: 0 14px 34px rgba(31, 31, 31, 0.55), 0 2px 6px rgba(31, 31, 31, 0.4);
-      transform: rotate(-2.5deg);   /* still, like the cover on the flyer */
+      box-shadow: 0 8px 22px rgba(31, 31, 31, 0.5);
     }
-    @media (min-width: 768px) {
-      .hero { padding-top: 4rem; padding-bottom: 4rem; }
-      .hero-grid {
-        grid-template-columns: minmax(0, 1fr) minmax(260px, 36%);
-        gap: 3.5rem;
-      }
-      /* Cover on the right on wider screens, stacked above text on phones. */
-      .hero-cover { order: 2; width: 100%; max-width: 400px; justify-self: end; padding: 1rem 1.5rem 1.5rem 0; }
-      .hero-text  { order: 1; }
-    }
-
     .subtitle {
       font-size: 1.25rem;
       font-weight: 700;
       line-height: 1.35;
-      margin: 0 0 0.9rem;
+      margin: 0 0 1.5rem;
+      max-width: 26em;
     }
     .byline {
       font-family: "Oswald", "Arial Narrow", Impact, sans-serif;
       font-weight: 500;
       font-size: 1.5rem;
-      margin: 0 0 1.75rem;
+      line-height: 1.2;
+      margin: 0 0 2rem;
+      padding-top: 0.75rem;
+      border-top: 3px solid var(--yellow);
+      display: inline-block;
     }
     @media (min-width: 768px) {
       .subtitle { font-size: 1.45rem; }
-      .byline { font-size: 1.75rem; }
+      .byline { font-size: 1.8rem; }
     }
-
     .availability {
-      display: inline-block;
-      margin: 1.5rem 0 0;
-      padding: 0.35rem 0.9rem;
-      font-weight: 700;
+      margin: 1.25rem 0 0;
       font-size: 1rem;
-      border: 3px solid var(--yellow);
-      border-radius: 6px;
     }
 
-    /* Taglines: a quiet band directly under the hero, as on the flyer. */
-    .taglines-band {
-      background: var(--paper);
-      border-bottom: 1px solid var(--green);
-      padding: 2.25rem 0;
-      text-align: center;
-    }
+    /* ---------- Epigraph: the three lines from the flyer ---------- */
+    .epigraph { padding: 2.5rem 0 1rem; }
+    @media (min-width: 768px) { .epigraph { padding: 3.5rem 0 1.5rem; } }
     .taglines {
       list-style: none;
-      margin: 0 auto;
-      padding: 0;
-      max-width: 44rem;
+      margin: 0;
+      padding: 0.25rem 0 0.25rem 1.25rem;
+      border-left: 6px solid var(--yellow);
+      max-width: 34em;
     }
     .taglines li {
       font-family: "Oswald", "Arial Narrow", Impact, sans-serif;
@@ -257,327 +241,244 @@
       font-size: 1.35rem;
       line-height: 1.35;
       color: var(--green);
-      margin: 0 0 0.45rem;
     }
-    .taglines li:last-child { margin-bottom: 0; }
-    @media (min-width: 768px) {
-      .taglines-band { padding: 3rem 0; }
-      .taglines li { font-size: 1.7rem; }
-    }
+    @media (min-width: 768px) { .taglines li { font-size: 1.65rem; } }
 
     /* ================================================================
        2. ABOUT THE BOOK
        ================================================================ */
-    .about-grid {
-      display: grid;
-      gap: 2.5rem;
+    .lead {
+      font-size: 1.15rem;
     }
-    @media (min-width: 900px) {
-      .about-grid {
-        grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
-        gap: 4rem;
-        align-items: start;
-      }
-    }
-    figure { margin: 0; }
+    @media (min-width: 768px) { .lead { font-size: 1.25rem; } }
 
-    /* A photographic print: white mount, soft shadow, slight set-down tilt. */
-    .photo {
-      padding: 0.75rem 1rem 1.25rem 0.5rem;
+    /* The photograph runs the full width of the page, under the text. */
+    .plate {
+      margin: 2.75rem 0 0;
     }
-    .photo .print {
-      background: var(--white);
-      padding: 0.6rem 0.6rem 0.9rem;
-      box-shadow: 0 10px 28px rgba(31, 31, 31, 0.28), 0 2px 5px rgba(31, 31, 31, 0.2);
-      transform: rotate(1.5deg);
-    }
-    .photo img {
+    .plate img {
       width: 100%;
       aspect-ratio: 824 / 610;
       object-fit: cover;
       background: var(--green);
     }
-    figcaption {
-      font-size: 0.95rem;
+    @media (min-width: 900px) {
+      .plate { grid-column: 1 / -1; margin-top: 3.5rem; }
+    }
+    .plate figcaption {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 0.25rem 3rem;
+      margin-top: 0.75rem;
+      padding-top: 0.6rem;
+      border-top: 1px solid var(--green);
+      font-size: 0.9rem;
       line-height: 1.5;
-      margin-top: 1.25rem;
-      padding-left: 0.5rem;
-      color: var(--ink);
-    }
-
-    /* "At a glance" details, like the back of a dust jacket. */
-    .details {
-      margin: 2.25rem 0 0;
-      padding: 1.25rem 1.5rem;
-      background: var(--white);
-      border-top: 6px solid var(--green);
-      max-width: 36rem;
-    }
-    .details h3 {
-      font-size: 1.25rem;
-      color: var(--green);
-      margin-bottom: 0.75rem;
-    }
-    .details dl {
-      margin: 0;
-      display: grid;
-      grid-template-columns: max-content minmax(0, 1fr);
-      column-gap: 1.25rem;
-      row-gap: 0.4rem;
-    }
-    .details dt { font-weight: 700; }
-    .details dd { margin: 0; }
-
-    /* ================================================================
-       3. WHAT PEOPLE ARE SAYING
-       ================================================================ */
-    .praise { background: var(--white); border-top: 1px solid var(--green); border-bottom: 1px solid var(--green); }
-    .quotes {
-      display: grid;
-      gap: 1.75rem;
     }
     @media (min-width: 900px) {
-      .quotes { grid-template-columns: 1fr 1fr; gap: 2.5rem; }
+      .plate figcaption { grid-template-columns: 9rem minmax(0, 1fr); }
     }
+    .plate figcaption .fig {
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--green);
+    }
+    .plate figcaption p { max-width: 60ch; }
+
+    /* ================================================================
+       3. ENDORSEMENTS — set as pull quotes, not cards
+       ================================================================ */
+    .praise { background: var(--white); }
     .quote {
-      position: relative;
-      background: var(--paper);
-      border-left: 8px solid var(--green);
-      padding: 2.75rem 1.5rem 1.5rem 1.75rem;
-      margin: 0;
+      margin: 0 0 2.5rem;
+      max-width: 60ch;
     }
-    /* Large decorative opening quotation mark in the accent yellow. */
-    .quote::before {
-      content: "\201C";
-      position: absolute;
-      top: -0.1em;
-      left: 1.1rem;
-      font-family: Georgia, "Times New Roman", serif;
-      font-size: 5.5rem;
-      line-height: 1;
-      color: var(--yellow);
+    .quote:last-child { margin-bottom: 0; }
+    /* The second quotation is pushed to the right on wide screens. */
+    @media (min-width: 900px) {
+      .quote + .quote { margin-left: 6rem; }
     }
     .quote blockquote {
-      margin: 0 0 1.1rem;
-      font-size: 1.15rem;
+      margin: 0 0 0.9rem;
+      font-size: 1.25rem;
+      line-height: 1.5;
       font-style: italic;
+      text-indent: -0.45em;           /* hang the opening quotation mark */
     }
-    .quote blockquote p::after { content: "\201D"; }
+    @media (min-width: 768px) { .quote blockquote { font-size: 1.4rem; } }
+    .quote blockquote p::before { content: "\201C"; }
+    .quote blockquote p::after  { content: "\201D"; }
     .quote figcaption {
       font-size: 1rem;
-      font-style: normal;
-      margin: 0;
-      padding: 0;
-      border-top: 2px solid var(--yellow);
-      padding-top: 0.75rem;
+      padding-left: 1.25rem;
+      border-left: 3px solid var(--yellow);
     }
-    .quote figcaption strong { display: block; font-weight: 700; font-size: 1.1rem; }
+    .quote figcaption strong { display: block; font-weight: 700; }
 
     /* ================================================================
        4. ABOUT THE AUTHOR
        ================================================================ */
     .author-grid {
       display: grid;
-      gap: 2.25rem;
+      gap: 2rem;
       align-items: start;
     }
-    .author-photo {
-      position: relative;
-      width: 220px;
-      padding: 0 0.9rem 0.9rem 0;
+    @media (min-width: 700px) {
+      .author-grid { grid-template-columns: 240px minmax(0, 1fr); gap: 2.5rem; }
     }
-    /* Yellow offset block behind the portrait, a still accent. */
-    .author-photo::before {
-      content: "";
-      position: absolute;
-      top: 0.9rem;
-      left: 0.9rem;
-      right: 0;
-      bottom: 0;
-      background: var(--yellow);
-      border-radius: 14px;
-    }
+    .author-photo { width: 200px; }
+    @media (min-width: 700px) { .author-photo { width: 240px; } }
     .author-photo img {
-      position: relative;
       width: 100%;
       aspect-ratio: 487 / 635;
       object-fit: cover;
       object-position: top;
-      border-radius: 14px;
+      border-radius: 3px;
       background: var(--green);
     }
-    @media (min-width: 900px) {
-      .author-grid { grid-template-columns: 300px minmax(0, 1fr); gap: 3.5rem; }
-      .author-photo { width: 300px; }
+    .author-name {
+      font-size: 1.9rem;
     }
 
     /* ================================================================
-       5. SIGN-UP (the one call to action)
+       5. SIGN-UP — the one call to action
        ================================================================ */
-    .signup .lead {
-      font-size: 1.15rem;
-      margin-bottom: 2rem;
-    }
+    .signup .lead { margin-bottom: 1.75rem; max-width: 60ch; }
 
-    .form-card {
+    .form-panel {
       background: var(--paper);
       color: var(--ink);
-      padding: 1.5rem 1.25rem;
-      border-radius: 8px;
-      border-top: 10px solid var(--yellow);
-      max-width: 36rem;
-      box-shadow: 0 12px 30px rgba(31, 31, 31, 0.35);
+      padding: 1.5rem 1.25rem 1.75rem;
+      border-left: 10px solid var(--yellow);
+      max-width: 34rem;
     }
-    @media (min-width: 600px) {
-      .form-card { padding: 2rem; }
-    }
+    @media (min-width: 600px) { .form-panel { padding: 2rem 2rem 2.25rem; } }
 
     label {
       display: block;
       font-weight: 700;
       font-size: 1.1rem;
-      margin-bottom: 0.4rem;
+      margin-bottom: 0.35rem;
     }
-    .hint {
-      margin: 0 0 0.75rem;
-      font-size: 1rem;
-    }
+    .hint { margin: 0 0 0.75rem; font-size: 1rem; }
     input[type="email"] {
       display: block;
       width: 100%;
       min-height: 56px;
-      padding: 0.6rem 1rem;
+      padding: 0.6rem 0.9rem;
       font: inherit;
       font-size: 1.15rem;
       color: var(--ink);
       background: var(--white);
-      border: 3px solid var(--ink);
-      border-radius: 6px;
+      border: 2px solid var(--ink);
+      border-radius: 2px;
     }
-    input[type="email"][aria-invalid="true"] {
-      border-color: var(--green);
-      border-width: 4px;
-    }
+    input[type="email"][aria-invalid="true"] { border-width: 4px; }
     .error {
       margin: 0.75rem 0 0;
-      padding: 0.6rem 0.9rem;
+      padding: 0.5rem 0 0.5rem 0.9rem;
       font-weight: 700;
-      border-left: 8px solid var(--yellow);
-      background: var(--white);
+      border-left: 6px solid var(--yellow);
     }
     .error:empty { display: none; }
-    .form-card .btn {
+    .form-panel .btn {
       width: 100%;
       margin-top: 1.25rem;
       border-color: var(--green);
     }
-    .form-card .btn[disabled] { cursor: default; }
+    .form-panel .btn[disabled] { cursor: default; }
 
-    .thanks {
-      font-size: 1.15rem;
-    }
-    .thanks h3 {
-      font-size: 1.6rem;
-      color: var(--green);
-      margin-bottom: 0.4em;
-    }
+    .thanks { font-size: 1.15rem; }
+    .thanks h3 { font-size: 1.6rem; color: var(--green); margin-bottom: 0.4em; }
     [hidden] { display: none !important; }
 
     /* Honeypot: hidden from people, present for spam robots. */
-    .hp {
-      position: absolute;
-      left: -10000px;
-      width: 1px;
-      height: 1px;
-      overflow: hidden;
-    }
+    .hp { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
 
     /* ================================================================
-       6. FOOTER
+       6. COLOPHON
        ================================================================ */
     footer {
+      border-top: 1px solid var(--green);
       font-size: 0.95rem;
-      border-top: 6px solid var(--yellow);
     }
-    footer p { margin-bottom: 0.6em; }
-    footer .privacy { margin-top: 1.5rem; max-width: 70ch; }
+    .colophon {
+      margin: 0 0 1.5rem;
+      display: grid;
+      grid-template-columns: max-content minmax(0, 1fr);
+      gap: 0.3rem 1.5rem;
+      max-width: 40rem;
+    }
+    .colophon dt { font-weight: 700; }
+    .colophon dd { margin: 0; }
+    footer .privacy { max-width: 70ch; }
   </style>
 </head>
 
 <body>
 
-  <!-- ============================================================
-       1. HERO
-       ============================================================ -->
+  <!-- 1. Title page -->
   <header class="hero">
-    <div class="wrap hero-grid">
+    <div class="page hero-grid">
       <div class="hero-cover">
         <img src="images/cover.jpg"
              width="661" height="943" fetchpriority="high" decoding="async"
              alt="Front cover of Power to the People: a long concrete tunnel receding into the distance, lit by lamps along its curved walls">
       </div>
       <div class="hero-text">
-        <h1>Power to the People</h1>
+        <p class="kicker">New from Spinning Plates Press · October 2026</p>
+        <h1>Power to<br>the People</h1>
         <p class="subtitle">The Ministry of Works and Construction of the Tongariro Power Development</p>
         <p class="byline">Gillian Tompsett</p>
-
-        <a class="btn" href="#signup" id="jump-to-form">Notify me when it's available</a>
-
-        <p class="availability">Available for purchase October 2026</p>
+        <div>
+          <a class="btn" href="#signup" id="jump-to-form">Notify me when it's available</a>
+        </div>
+        <p class="availability">Available for purchase from October 2026 at spinningplatespress.co.nz</p>
       </div>
     </div>
   </header>
 
-  <div class="taglines-band">
-    <div class="wrap">
-      <ul class="taglines">
-        <li>A massive project in the 1960s and 70s…</li>
-        <li>A nation at the far end of the earth, distant from all resources…</li>
-        <li>A public service enterprise of the first order.</li>
-      </ul>
-    </div>
-  </div>
-
   <main>
 
-    <!-- ============================================================
-         2. ABOUT THE BOOK
-         ============================================================ -->
-    <section id="about" class="on-light" aria-labelledby="about-heading">
-      <div class="wrap about-grid">
+    <div class="epigraph">
+      <div class="page part">
+        <div></div>
+        <ul class="taglines">
+          <li>A massive project in the 1960s and 70s…</li>
+          <li>A nation at the far end of the earth, distant from all resources…</li>
+          <li>A public service enterprise of the first order.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- 2. About the book -->
+    <section id="about" aria-labelledby="about-heading">
+      <div class="page part">
+        <p class="label"><span class="num">1</span>The book</p>
         <div class="measure">
           <h2 id="about-heading">About the book</h2>
-          <p>The book dispels anti-public sector myths about large national infrastructure provision and argues that for nearly a century, the Ministry of Works and Development exemplified a mix of cutting-edge technology, sufficient funding, long-term institutional knowledge, skilled people, and a collective commitment to the public purpose of nation building.</p>
+          <p class="lead">The book dispels anti-public sector myths about large national infrastructure provision and argues that for nearly a century, the Ministry of Works and Development exemplified a mix of cutting-edge technology, sufficient funding, long-term institutional knowledge, skilled people, and a collective commitment to the public purpose of nation building.</p>
           <p>A timely reminder of New Zealand's history of exceptional capability in environmentally-friendly engineering, and of the dangers ahead if this expertise continues to languish.</p>
-
-          <div class="details">
-            <h3>At a glance</h3>
-            <dl>
-              <dt>Author</dt><dd>Gillian Tompsett</dd>
-              <dt>Publisher</dt><dd>Spinning Plates Press, 2026</dd>
-              <dt>Available</dt><dd>October 2026, from spinningplatespress.co.nz</dd>
-              <dt>ISBN</dt><dd>978-0-473-79935-9</dd>
-            </dl>
-          </div>
         </div>
-        <figure class="photo">
-          <div class="print">
-            <img src="images/crew.jpg"
-                 width="824" height="610" loading="lazy" decoding="async"
-                 alt="Colour photograph of a Ministry of Works crew in hard hats standing in front of a concrete dam wall, holding up a sign that reads Moawhango Dam, 120,000 yards of concrete, 28 February 1975">
-          </div>
-          <figcaption>The crew at Moawhango Dam marks 120,000 yards of concrete poured, 28 February 1975.</figcaption>
+        <figure class="plate">
+          <img src="images/crew.jpg"
+               width="824" height="610" loading="lazy" decoding="async"
+               alt="Colour photograph of a Ministry of Works crew in hard hats standing in front of a concrete dam wall, holding up a sign that reads Moawhango Dam, 120,000 yards of concrete, 28 February 1975">
+          <figcaption>
+            <span class="fig">Photograph</span>
+            <p>The crew at Moawhango Dam, 28 February 1975, marking 120,000 yards of concrete poured.</p>
+          </figcaption>
         </figure>
       </div>
     </section>
 
-    <!-- ============================================================
-         3. WHAT PEOPLE ARE SAYING
-         ============================================================ -->
-    <section id="praise" class="praise" aria-labelledby="praise-heading">
-      <div class="wrap">
-        <h2 id="praise-heading">What people are saying</h2>
-        <div class="quotes">
+    <!-- 3. Endorsements -->
+    <section id="praise" class="praise rule-top" aria-labelledby="praise-heading">
+      <div class="page part">
+        <p class="label"><span class="num">2</span>Endorsements</p>
+        <div>
+          <h2 id="praise-heading">What people are saying</h2>
           <figure class="quote">
             <blockquote>
               <p>A timely reminder not only of the country's history of exceptional capability in environmentally-friendly engineering but of the dangers ahead if this expertise continues to languish because of political ideology.</p>
@@ -600,57 +501,57 @@
       </div>
     </section>
 
-    <!-- ============================================================
-         4. ABOUT THE AUTHOR
-         ============================================================ -->
-    <section id="author" aria-labelledby="author-heading">
-      <div class="wrap author-grid">
-        <div class="author-photo">
-          <img src="images/author.jpg"
-               width="487" height="635" loading="lazy" decoding="async"
-               alt="Portrait photograph of author Gillian Tompsett, smiling, in a blue jumper in front of flowering trees">
-        </div>
-        <div class="measure">
-          <h2 id="author-heading">About the author</h2>
-          <p><strong>Gillian Tompsett</strong> is a historian currently undertaking research for a PhD on the Ministry of Works. Her father was the Deputy City Engineer for the Napier City Council during the 1970s and she has worked on construction sites as a labourer.</p>
-          <p>She is interested in recording the oral histories of the people who helped build New Zealand's post-war public works infrastructure and lives with her family in Wellington.</p>
+    <!-- 4. About the author -->
+    <section id="author" class="rule-top" aria-labelledby="author-heading">
+      <div class="page part">
+        <p class="label"><span class="num">3</span>The author</p>
+        <div class="author-grid">
+          <div class="author-photo">
+            <img src="images/author.jpg"
+                 width="487" height="635" loading="lazy" decoding="async"
+                 alt="Portrait photograph of author Gillian Tompsett, smiling, in a blue jumper in front of flowering trees">
+          </div>
+          <div class="measure">
+            <h2 id="author-heading" class="author-name">Gillian Tompsett</h2>
+            <p>Gillian Tompsett is a historian currently undertaking research for a PhD on the Ministry of Works. Her father was the Deputy City Engineer for the Napier City Council during the 1970s and she has worked on construction sites as a labourer.</p>
+            <p>She is interested in recording the oral histories of the people who helped build New Zealand's post-war public works infrastructure and lives with her family in Wellington.</p>
+          </div>
         </div>
       </div>
     </section>
 
-    <!-- ============================================================
-         5. SIGN-UP — the one call to action
-         ============================================================ -->
+    <!-- 5. Sign-up: the one call to action -->
     <section id="signup" class="band signup" aria-labelledby="signup-heading" tabindex="-1">
-      <div class="wrap">
-        <div class="measure">
+      <div class="page part">
+        <p class="label"><span class="num">4</span>Be notified</p>
+        <div>
           <h2 id="signup-heading">Be the first to know when it's available</h2>
-          <p class="lead">Leave your email address and we will send you one message when <em>Power to the People</em> is ready to order, in October&nbsp;2026.</p>
-        </div>
+          <p class="lead">Leave your email address and we will send you one message when <em>Power to the People</em> is ready to order, in October 2026.</p>
 
-        <div class="form-card">
-          <!-- For Netlify Forms, add:  name="notify" data-netlify="true" netlify-honeypot="bot-field"
-               to this <form> tag and set FORM_ENDPOINT to "NETLIFY" in the script below. -->
-          <form id="notify-form" method="post" action="#" novalidate>
-            <label for="email">Your email address</label>
-            <p class="hint" id="email-hint">We'll only email you about this book.</p>
-            <input type="email" id="email" name="email"
-                   autocomplete="email" inputmode="email" spellcheck="false"
-                   required aria-describedby="email-hint email-error">
-            <p class="error" id="email-error" role="alert" aria-live="assertive"></p>
+          <div class="form-panel">
+            <!-- For Netlify Forms, add:  name="notify" data-netlify="true" netlify-honeypot="bot-field"
+                 to this <form> tag and set FORM_ENDPOINT to "NETLIFY" in the script below. -->
+            <form id="notify-form" method="post" action="#" novalidate>
+              <label for="email">Your email address</label>
+              <p class="hint" id="email-hint">We'll only email you about this book.</p>
+              <input type="email" id="email" name="email"
+                     autocomplete="email" inputmode="email" spellcheck="false"
+                     required aria-describedby="email-hint email-error">
+              <p class="error" id="email-error" role="alert" aria-live="assertive"></p>
 
-            <!-- Honeypot: people never see this field; spam robots fill it in. -->
-            <div class="hp" aria-hidden="true">
-              <label for="bot-field">Leave this field empty</label>
-              <input type="text" id="bot-field" name="bot-field" tabindex="-1" autocomplete="off">
+              <!-- Honeypot: people never see this field; spam robots fill it in. -->
+              <div class="hp" aria-hidden="true">
+                <label for="bot-field">Leave this field empty</label>
+                <input type="text" id="bot-field" name="bot-field" tabindex="-1" autocomplete="off">
+              </div>
+
+              <button type="submit" class="btn" id="submit-btn">Notify me when it's available</button>
+            </form>
+
+            <div class="thanks" id="thanks" hidden tabindex="-1">
+              <h3>Thank you</h3>
+              <p>We've got your email address. We'll be in touch when <em>Power to the People</em> is available to order, and not before.</p>
             </div>
-
-            <button type="submit" class="btn" id="submit-btn">Notify me when it's available</button>
-          </form>
-
-          <div class="thanks" id="thanks" hidden tabindex="-1">
-            <h3>Thank you</h3>
-            <p>We've got your email address. We'll be in touch when <em>Power to the People</em> is available to order, and not before.</p>
           </div>
         </div>
       </div>
@@ -658,15 +559,20 @@
 
   </main>
 
-  <!-- ============================================================
-       6. FOOTER
-       ============================================================ -->
-  <footer class="band">
-    <div class="wrap">
-      <p><strong>Power to the People</strong> is published by Spinning Plates Press, 2026.</p>
-      <p>ISBN 978-0-473-79935-9</p>
-      <p><a href="https://spinningplatespress.co.nz">spinningplatespress.co.nz</a></p>
-      <p class="privacy">Privacy: your email address is used only to tell you when this book is available. It is not shared with anyone else, and you can ask us to remove it at any time.</p>
+  <!-- 6. Colophon -->
+  <footer>
+    <div class="page part">
+      <p class="label">Details</p>
+      <div>
+        <dl class="colophon">
+          <dt>Title</dt><dd><em>Power to the People: The Ministry of Works and Construction of the Tongariro Power Development</em></dd>
+          <dt>Author</dt><dd>Gillian Tompsett</dd>
+          <dt>Publisher</dt><dd>Spinning Plates Press, 2026</dd>
+          <dt>ISBN</dt><dd>978-0-473-79935-9</dd>
+          <dt>Orders</dt><dd><a href="https://spinningplatespress.co.nz">spinningplatespress.co.nz</a>, from October 2026</dd>
+        </dl>
+        <p class="privacy">Privacy: your email address is used only to tell you when this book is available. It is not shared with anyone else, and you can ask us to remove it at any time.</p>
+      </div>
     </div>
   </footer>
 
