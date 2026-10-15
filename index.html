@@ -63,6 +63,7 @@
     }
     h1 { font-size: 2.75rem; color: var(--yellow); letter-spacing: 0.01em; }
     h2 { font-size: 1.9rem; color: var(--green); }
+    h2 em { font-style: normal; }
     @media (min-width: 768px) {
       h1 { font-size: 3.8rem; }
       h2 { font-size: 2.3rem; }
@@ -106,23 +107,15 @@
     }
 
     .label {
-      font-family: "Oswald", "Arial Narrow", Impact, sans-serif;
-      font-weight: 500;
-      font-size: 1rem;
-      line-height: 1.3;
+      font-family: "Source Sans 3", "Helvetica Neue", Arial, sans-serif;
+      font-weight: 700;
+      font-size: 0.85rem;
+      line-height: 1.4;
       letter-spacing: 0.14em;
       text-transform: uppercase;
       color: var(--green);
-      padding-top: 0.45rem;
+      padding-top: 0.5rem;
       border-top: 3px solid var(--green);
-    }
-    .label .num {
-      display: block;
-      font-weight: 700;
-      font-size: 2rem;
-      letter-spacing: 0;
-      line-height: 1;
-      margin-bottom: 0.3rem;
     }
     .band .label { color: var(--white); border-top-color: var(--yellow); }
 
@@ -173,7 +166,7 @@
       align-items: end;
     }
     @media (min-width: 768px) {
-      .hero-grid { grid-template-columns: minmax(0, 1fr) minmax(240px, 32%); gap: 4rem; }
+      .hero-grid { grid-template-columns: minmax(0, 1fr) minmax(280px, 38%); gap: 4rem; align-items: center; }
       .hero-cover { order: 2; justify-self: end; }
       .hero-text  { order: 1; }
     }
@@ -191,13 +184,13 @@
     .hero-cover {
       width: min(62%, 240px);
     }
-    @media (min-width: 768px) { .hero-cover { width: 100%; max-width: 340px; } }
+    @media (min-width: 768px) { .hero-cover { width: 100%; max-width: 420px; } }
     .hero-cover img {
       width: 100%;
       aspect-ratio: 661 / 943;
       object-fit: cover;
       background: var(--paper);
-      box-shadow: 0 8px 22px rgba(31, 31, 31, 0.5);
+      box-shadow: 0 10px 26px rgba(31, 31, 31, 0.5);
     }
     .subtitle {
       font-size: 1.25rem;
@@ -252,6 +245,24 @@
     }
     @media (min-width: 768px) { .lead { font-size: 1.25rem; } }
 
+    .pub-details {
+      margin: 2rem 0 0;
+      padding-top: 1rem;
+      border-top: 1px solid var(--green);
+      display: grid;
+      grid-template-columns: max-content minmax(0, 1fr);
+      gap: 0.3rem 1.5rem;
+      font-size: 0.95rem;
+    }
+    .pub-details dt { font-weight: 700; }
+    .pub-details dd { margin: 0; }
+    /* On phones, stack each label over its value. */
+    @media (max-width: 599px) {
+      .pub-details, .colophon { grid-template-columns: minmax(0, 1fr); gap: 0; }
+      .pub-details dt, .colophon dt { margin-top: 0.6rem; }
+      .pub-details dt:first-child, .colophon dt:first-child { margin-top: 0; }
+    }
+
     /* The photograph runs the full width of the page, under the text. */
     .plate {
       margin: 2.75rem 0 0;
@@ -291,14 +302,12 @@
        ================================================================ */
     .praise { background: var(--white); }
     .quote {
-      margin: 0 0 2.5rem;
-      max-width: 60ch;
+      margin: 0;
+      padding: 1.75rem 0;
+      max-width: 62ch;
+      border-top: 1px solid var(--green);
     }
-    .quote:last-child { margin-bottom: 0; }
-    /* The second quotation is pushed to the right on wide screens. */
-    @media (min-width: 900px) {
-      .quote + .quote { margin-left: 6rem; }
-    }
+    .quote:last-child { padding-bottom: 0; }
     .quote blockquote {
       margin: 0 0 0.9rem;
       font-size: 1.25rem;
@@ -345,6 +354,13 @@
        5. SIGN-UP — the one call to action
        ================================================================ */
     .signup .lead { margin-bottom: 1.75rem; max-width: 60ch; }
+    .signup-row { display: grid; gap: 2.5rem; align-items: start; }
+    .signup-cover { display: none; }
+    @media (min-width: 1000px) {
+      .signup-row { grid-template-columns: minmax(0, 34rem) 180px; }
+      .signup-cover { display: block; }
+      .signup-cover img { width: 180px; aspect-ratio: 661 / 943; object-fit: cover; box-shadow: 0 8px 20px rgba(31, 31, 31, 0.5); }
+    }
 
     .form-panel {
       background: var(--paper);
@@ -413,6 +429,16 @@
     .colophon dt { font-weight: 700; }
     .colophon dd { margin: 0; }
     footer .privacy { max-width: 70ch; }
+    .imprint {
+      font-family: "Oswald", "Arial Narrow", Impact, sans-serif;
+      font-weight: 700;
+      font-size: 1.4rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--green);
+      margin: 0 0 0.25rem;
+    }
+    .imprint-line { margin-bottom: 1.5rem; }
   </style>
 </head>
 
@@ -455,11 +481,17 @@
     <!-- 2. About the book -->
     <section id="about" aria-labelledby="about-heading">
       <div class="page part">
-        <p class="label"><span class="num">1</span>The book</p>
+        <p class="label">About the book</p>
         <div class="measure">
           <h2 id="about-heading">About the book</h2>
           <p class="lead">The book dispels anti-public sector myths about large national infrastructure provision and argues that for nearly a century, the Ministry of Works and Development exemplified a mix of cutting-edge technology, sufficient funding, long-term institutional knowledge, skilled people, and a collective commitment to the public purpose of nation building.</p>
           <p>A timely reminder of New Zealand's history of exceptional capability in environmentally-friendly engineering, and of the dangers ahead if this expertise continues to languish.</p>
+          <dl class="pub-details">
+            <dt>Publication</dt><dd>October 2026</dd>
+            <dt>Publisher</dt><dd>Spinning Plates Press</dd>
+            <dt>ISBN</dt><dd>978-0-473-79935-9</dd>
+            <dt>Available from</dt><dd>spinningplatespress.co.nz</dd>
+          </dl>
         </div>
         <figure class="plate">
           <img src="images/crew.jpg"
@@ -476,9 +508,9 @@
     <!-- 3. Endorsements -->
     <section id="praise" class="praise rule-top" aria-labelledby="praise-heading">
       <div class="page part">
-        <p class="label"><span class="num">2</span>Endorsements</p>
+        <p class="label">Praise</p>
         <div>
-          <h2 id="praise-heading">What people are saying</h2>
+          <h2 id="praise-heading">Praise for <em>Power to the People</em></h2>
           <figure class="quote">
             <blockquote>
               <p>A timely reminder not only of the country's history of exceptional capability in environmentally-friendly engineering but of the dangers ahead if this expertise continues to languish because of political ideology.</p>
@@ -504,7 +536,7 @@
     <!-- 4. About the author -->
     <section id="author" class="rule-top" aria-labelledby="author-heading">
       <div class="page part">
-        <p class="label"><span class="num">3</span>The author</p>
+        <p class="label">About the author</p>
         <div class="author-grid">
           <div class="author-photo">
             <img src="images/author.jpg"
@@ -523,11 +555,12 @@
     <!-- 5. Sign-up: the one call to action -->
     <section id="signup" class="band signup" aria-labelledby="signup-heading" tabindex="-1">
       <div class="page part">
-        <p class="label"><span class="num">4</span>Be notified</p>
+        <p class="label">Coming October 2026</p>
         <div>
           <h2 id="signup-heading">Be the first to know when it's available</h2>
           <p class="lead">Leave your email address and we will send you one message when <em>Power to the People</em> is ready to order, in October 2026.</p>
 
+          <div class="signup-row">
           <div class="form-panel">
             <!-- For Netlify Forms, add:  name="notify" data-netlify="true" netlify-honeypot="bot-field"
                  to this <form> tag and set FORM_ENDPOINT to "NETLIFY" in the script below. -->
@@ -553,6 +586,10 @@
               <p>We've got your email address. We'll be in touch when <em>Power to the People</em> is available to order, and not before.</p>
             </div>
           </div>
+          <div class="signup-cover">
+            <img src="images/cover.jpg" width="661" height="943" loading="lazy" decoding="async" alt="">
+          </div>
+          </div>
         </div>
       </div>
     </section>
@@ -562,14 +599,16 @@
   <!-- 6. Colophon -->
   <footer>
     <div class="page part">
-      <p class="label">Details</p>
+      <p class="label">Publisher</p>
       <div>
+        <p class="imprint">Spinning Plates Press</p>
+        <p class="imprint-line"><a href="https://spinningplatespress.co.nz">spinningplatespress.co.nz</a></p>
         <dl class="colophon">
           <dt>Title</dt><dd><em>Power to the People: The Ministry of Works and Construction of the Tongariro Power Development</em></dd>
           <dt>Author</dt><dd>Gillian Tompsett</dd>
-          <dt>Publisher</dt><dd>Spinning Plates Press, 2026</dd>
+          <dt>Published</dt><dd>Spinning Plates Press, 2026</dd>
           <dt>ISBN</dt><dd>978-0-473-79935-9</dd>
-          <dt>Orders</dt><dd><a href="https://spinningplatespress.co.nz">spinningplatespress.co.nz</a>, from October 2026</dd>
+          <dt>Orders</dt><dd>From October 2026 at spinningplatespress.co.nz</dd>
         </dl>
         <p class="privacy">Privacy: your email address is used only to tell you when this book is available. It is not shared with anyone else, and you can ask us to remove it at any time.</p>
       </div>
