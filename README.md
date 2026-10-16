@@ -42,15 +42,34 @@ Nothing in `index.html` needs to change. Tips:
 
 ---
 
-## 2. Setting up the email sign-up form
+## 2. The email sign-up form
 
-**Until the steps below are done, no sign-up is emailed anywhere.** The page knows this: instead of showing "Thank you", it opens the visitor's own email app with a message addressed to trentpinet@gmail.com, so sign-ups are not lost in the meantime. That is a stop-gap, not the finished thing, because it depends on the visitor having an email app set up.
+Each sign-up is emailed to the address set in `index.html` (the `PUBLISHER_MAILBOX` line near the bottom, currently the test address trentpinet@gmail.com). **Before the book goes on sale, change that line to the publisher's inbox**, `["spinningplatespress", "icloud.com"]`, and publish the page again. The address is written in two parts so that robots scanning the page for email addresses do not pick it up.
 
-To receive sign-ups automatically, the page needs somewhere to send them. The recommended way uses a small script inside a Google account: each sign-up is emailed to the address you choose and added to a Google Sheet, so you also have a list to write to when the book launches. The receiving address is stored in the script on Google's side. It is never written into the page or into these files, so visitors cannot see it.
+The page can deliver sign-ups three ways. Option A is switched on and needs no account; the others are there if you want them later.
 
-You need a Google account (a Gmail address, or any account you use for Google Drive). It takes about ten minutes.
+### Option A — FormSubmit relay (switched on, nothing to install)
 
-### Option A — Google Sheet and script (recommended, works with any hosting)
+The page sends each sign-up to <https://formsubmit.co>, a free relay that forwards it as an email to the inbox above. There is no account to create.
+
+1. Publish the page (section 3).
+2. Open the live page, enter your own email address in the form and press the button. "Thank you" appears.
+3. **The first time only**, FormSubmit sends an email to the inbox with the subject "Activate your form" (check the junk folder). Open it and click the activation link. This is what tells FormSubmit the inbox owner agrees to receive the form.
+4. Submit the form once more. Within a minute an email with the subject "New sign-up for Power to the People" arrives, showing the address and a reply-to set to it. From now on every sign-up is delivered the same way.
+
+If you change the inbox address later, FormSubmit sends a fresh activation email to the new inbox, so repeat steps 2 to 4.
+
+Notes:
+
+- FormSubmit's free service has no fixed cap on submissions and keeps no public list; each one is simply forwarded. If you want a spreadsheet of sign-ups as well, use option B, or make a Gmail filter that labels these messages.
+- If "Sorry, something went wrong" appears on the page, FormSubmit could not be reached or rejected the submission. The message includes an "email us" link so the visitor can still reach you. Try again in a minute; if it persists, switch to option B.
+- The page never pretends: "Thank you" appears only after FormSubmit confirms it accepted the submission.
+
+### Option B — Google Sheet and script (private, keeps a list, about ten minutes)
+
+A small script inside your own Google account receives each sign-up, emails it to you and adds a row to a Google Sheet, so you also have a list to write to when the book launches. Nothing passes through a third party.
+
+You need a Google account (a Gmail address, or any account you use for Google Drive).
 
 1. Go to <https://sheets.google.com>, sign in, and click the **+** to create a blank spreadsheet. Name it something like "Power to the People sign-ups". This sheet will hold the list.
 2. In the spreadsheet's menu, click **Extensions**, then **Apps Script**. A new tab opens showing a code editor with a few lines in it.
@@ -61,9 +80,9 @@ You need a Google account (a Gmail address, or any account you use for Google Dr
    var RECIPIENT = "trentpinet@gmail.com";
    ```
 
-   That is the inbox that will receive every sign-up. It is currently set to a test address; **before the book goes on sale, change it to `spinningplatespress@icloud.com`** (here and in the `PUBLISHER_MAILBOX` line near the bottom of `index.html`), then deploy a new version as described in the notes below. Keep the quotes.
+   That is the inbox that will receive every sign-up. It is currently the test address; set it to the publisher's inbox before launch. Keep the quotes.
 5. Click the **save** icon (or press Ctrl+S / Cmd+S).
-6. **Send a test email first.** In the toolbar above the code, there is a drop-down that says `doPost`. Change it to `sendTestEmail` and click **Run**. Google asks you to authorise the script: choose your account, and if it shows a warning that the app isn't verified, click **Advanced**, then **Go to … (unsafe)**, then **Allow**. (This warning appears because you wrote the script yourself; it is yours.) Within a minute a message with the subject "Test: New sign-up for Power to the People" should arrive at trentpinet@gmail.com. Check the junk folder too. **If it does not arrive, stop here**: the script has not been authorised, and nothing after this will work either.
+6. **Send a test email first.** In the toolbar above the code, there is a drop-down that says `doPost`. Change it to `sendTestEmail` and click **Run**. Google asks you to authorise the script: choose your account, and if it shows a warning that the app isn't verified, click **Advanced**, then **Go to … (unsafe)**, then **Allow**. (This warning appears because you wrote the script yourself; it is yours.) Within a minute a message with the subject "Test: New sign-up for Power to the People" should arrive. Check the junk folder too. **If it does not arrive, stop here**: the script has not been authorised, and nothing after this will work either.
 7. Click the blue **Deploy** button at the top right, then **New deployment**.
 8. Click the gear icon next to "Select type" and choose **Web app**. Fill in:
    - Description: anything, for example "Sign-up form".
@@ -74,23 +93,22 @@ You need a Google account (a Gmail address, or any account you use for Google Dr
 11. Open `index.html` in a plain text editor and find this line near the bottom:
 
     ```
-    const FORM_ENDPOINT = "REPLACE_ME";
+    const FORM_ENDPOINT = "FORMSUBMIT";
     ```
 
-    Replace `REPLACE_ME` with the URL you copied, keeping the quotation marks:
+    Replace `FORMSUBMIT` with the URL you copied, keeping the quotation marks:
 
     ```
     const FORM_ENDPOINT = "https://script.google.com/macros/s/AKfycb.../exec";
     ```
 
-12. Save the file and publish it (section 3). Test it by entering your own email address on the page. The button reads "Sending…" for a moment, then "Thank you" appears. Within a minute a message with the subject "New sign-up for Power to the People" arrives at trentpinet@gmail.com, and a new row appears in the spreadsheet under a tab called "Sign-ups".
+12. Save the file and publish it (section 3). Test it by entering your own email address on the page. The button reads "Sending…" for a moment, then "Thank you" appears. Within a minute a message with the subject "New sign-up for Power to the People" arrives, and a new row appears in the spreadsheet under a tab called "Sign-ups".
 
 If something is wrong:
 
-- **The page opens your email app instead of showing "Thank you".** The `FORM_ENDPOINT` line in `index.html` still says `REPLACE_ME`, or the version with the URL has not been published yet.
+- **The page opens your email app instead of showing "Thank you".** The `FORM_ENDPOINT` line in `index.html` says `REPLACE_ME`, or the version you edited has not been published yet.
 - **"Sorry, something went wrong" appears on the page.** The page reached the address but did not get a proper answer. Check the URL you pasted is the one ending in `/exec` (not `/dev`), that the deployment has **Who has access: Anyone**, and that you authorised the script (step 6). After changing the script's settings, deploy a **New version** (see the notes below).
-- **"Thank you" appears but no email arrives.** Check the junk folder at trentpinet@gmail.com. Then open the Apps Script editor and click **Executions** in the left-hand menu: each sign-up is listed there, and a failed one shows the reason. If the Sheet tab "Sign-ups" has the row but no email came, the script is being blocked from sending; run `sendTestEmail` again (step 6).
-- **The page never pretends.** "Thank you" is shown only after the script confirms it has recorded the address, so a sign-up that reaches "Thank you" has been received.
+- **"Thank you" appears but no email arrives.** Check the junk folder. Then open the Apps Script editor and click **Executions** in the left-hand menu: each sign-up is listed there, and a failed one shows the reason. If the Sheet tab "Sign-ups" has the row but no email came, the script is being blocked from sending; run `sendTestEmail` again (step 6).
 
 Notes:
 
@@ -99,7 +117,7 @@ Notes:
 - If you ever change the code in the script, you must click **Deploy → Manage deployments**, choose the pencil icon, set Version to **New version**, and click **Deploy** again. The URL stays the same.
 - To also send each person a short confirmation email, change `SEND_CONFIRMATION = false` to `true` in the script and redeploy as above.
 
-### Option B — Netlify Forms (only if you host on Netlify, see below)
+### Option C — Netlify Forms (only if you host on Netlify, see below)
 
 1. In `index.html`, change the endpoint line to:
 
@@ -152,7 +170,7 @@ Open the page and look for these things:
 - The yellow title, three taglines and a green "Notify me when it's available" button at the top.
 - Pressing that button slides down to the sign-up form.
 - Typing a wrong address such as `name@example` and pressing the button shows a message asking for a valid address.
-- Typing a correct address shows "Thank you" (once section 2 is done; before that, your email app opens with a message addressed to the publisher).
+- Typing a correct address shows "Thank you", and the sign-up arrives by email (after the one-time activation in section 2).
 - Make the browser window narrow (or open the page on a phone). Everything should stack into a single column and stay readable.
 
 ---

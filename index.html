@@ -821,28 +821,34 @@
 
   <script>
     // ==================================================================
-    //  FORM ENDPOINT — the one thing to set up.
+    //  FORM ENDPOINT — where each sign-up is sent. One of:
     //
-    //  Google Apps Script (recommended, no third-party form service):
-    //    Follow README.md section 2. It gives you a web app address like
-    //    "https://script.google.com/macros/s/AKfycb.../exec".
-    //    Paste it between the quotes below. The receiving email address is
-    //    set inside the script, on Google's side (see RECIPIENT there).
+    //  "FORMSUBMIT"  (current) The free relay at formsubmit.co emails each
+    //                sign-up to PUBLISHER_MAILBOX below. No account and no
+    //                deployment needed. The first submission makes
+    //                FormSubmit send an activation email to that inbox;
+    //                click the link in it once and every later sign-up is
+    //                delivered. See README.md section 2, option A.
     //
-    //  Netlify Forms (if the site is hosted on Netlify):
-    //    Set FORM_ENDPOINT to "NETLIFY" and add
-    //    name="notify" data-netlify="true" netlify-honeypot="bot-field"
-    //    to the <form> tag above.
+    //  A Google Apps Script web app URL, like
+    //  "https://script.google.com/macros/s/AKfycb.../exec"
+    //                Private alternative: sign-ups go to a script in your
+    //                own Google account, which emails you and keeps a
+    //                Google Sheet. README.md section 2, option B.
     //
-    //  While it is still "REPLACE_ME", the page does NOT pretend to have
-    //  saved the address. Instead it opens the visitor's own email app
-    //  with a message addressed to the publisher, so no sign-up is lost.
+    //  "NETLIFY"     Netlify Forms, if the site is hosted on Netlify. Also
+    //                add name="notify" data-netlify="true"
+    //                netlify-honeypot="bot-field" to the <form> tag above.
+    //
+    //  "REPLACE_ME"  Nothing configured. The page then opens the visitor's
+    //                own email app with a message addressed to
+    //                PUBLISHER_MAILBOX rather than pretending to save it.
     // ==================================================================
-    const FORM_ENDPOINT = "REPLACE_ME";
+    const FORM_ENDPOINT = "FORMSUBMIT";
 
-    // The publisher's inbox, used only for the email-app fallback and for the
-    // "email us" link if sending fails. Kept in two parts so address-
-    // harvesting robots that scan the page source do not pick it up.
+    // The inbox that receives sign-ups through FormSubmit, and the address
+    // behind the email-app fallback and the "email us" link. Kept in two
+    // parts so address-harvesting robots scanning the page source miss it.
     const PUBLISHER_MAILBOX = ["trentpinet", "gmail.com"].join("@");
 
     // Give up on a send after this long and let the visitor try again.
@@ -862,6 +868,7 @@
       var INVALID_MESSAGE = "Please enter a valid email address, e.g. name@example.com";
       var FAILED_MESSAGE  = "Sorry, something went wrong and your address was not saved. Please try again in a moment, or email us at ";
       var MAIL_SUBJECT    = "Please notify me when Power to the People is available";
+      var RELAY_SUBJECT   = "New sign-up for Power to the People";
 
       // Plain-English check: something @ something . something, no spaces.
       function looksLikeEmail(value) {
@@ -925,7 +932,19 @@
         var options = { method: "POST", signal: controller ? controller.signal : undefined };
         var url;
 
-        if (FORM_ENDPOINT === "NETLIFY") {
+        if (FORM_ENDPOINT === "FORMSUBMIT") {
+          // FormSubmit relay: JSON in, JSON out, with the sign-up as the
+          // reply-to address so you can answer it straight from the inbox.
+          options.headers = { "Content-Type": "application/json", "Accept": "application/json" };
+          options.body = JSON.stringify({
+            email: value,
+            _subject: RELAY_SUBJECT,
+            _replyto: value,
+            _template: "table",
+            _captcha: "false"
+          });
+          url = "https://formsubmit.co/ajax/" + PUBLISHER_MAILBOX;
+        } else if (FORM_ENDPOINT === "NETLIFY") {
           // Netlify Forms: post URL-encoded data back to this page.
           var body = new URLSearchParams();
           body.append("form-name", form.getAttribute("name") || "notify");
@@ -951,7 +970,13 @@
           var type = response.headers.get("content-type") || "";
           if (type.indexOf("json") === -1) throw new Error("Unexpected reply (" + (type || "no content type") + ")");
           return response.json().then(function (result) {
-            if (!result || result.ok !== true) throw new Error((result && result.error) || "rejected");
+            if (!result) throw new Error("empty reply");
+            if (FORM_ENDPOINT === "FORMSUBMIT") {
+              // FormSubmit answers {"success":"true"|"false","message":"..."}.
+              if (String(result.success) !== "true") throw new Error(result.message || "rejected");
+            } else if (result.ok !== true) {
+              throw new Error(result.error || "rejected");
+            }
           });
         }, function (err) {
           if (timer) clearTimeout(timer);
