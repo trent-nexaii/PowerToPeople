@@ -9,6 +9,9 @@ index.html          the page (all styling and script are inside this one file)
 images/cover.jpg    book cover (portrait)
 images/crew.jpg     historical construction photo (landscape)
 images/author.jpg   author portrait (portrait or square)
+images/share.jpg    the picture shown when the link is shared (made from the cover)
+robots.txt          tells search engines they may index the page
+sitemap.xml         lists the page and its pictures for search engines
 apps-script/Code.gs the small script that emails each sign-up to you (see section 2)
 README.md           this file
 ```
@@ -143,3 +146,18 @@ Open the page and look for these things:
 - Typing a wrong address such as `name@example` and pressing the button shows a message asking for a valid address.
 - Typing a correct address shows "Thank you".
 - Make the browser window narrow (or open the page on a phone). Everything should stack into a single column and stay readable.
+
+---
+
+## Search engines and sharing
+
+The page carries everything a search engine or a social network needs, so nothing has to be set up:
+
+- **Structured data** (the `application/ld+json` block in the `<head>`) describes the publisher, the author, the book (title, ISBN, publication date, the two endorsements, pre-order availability) and the page itself, in the schema.org vocabulary that Google and Bing read.
+- **Open Graph and Twitter tags** make the link show the cover, title and description when it is shared on Facebook, LinkedIn, X, Slack, WhatsApp and the like. The share picture is `images/share.jpg`.
+- **`robots.txt` and `sitemap.xml`** at the root tell crawlers the page may be indexed and where the pictures are.
+- The canonical address is `https://www.spinningplatespress.co.nz/`. If the site ends up at a different address, search for that string in `index.html`, `robots.txt` and `sitemap.xml` and replace it.
+
+If you want a physical address or phone number listed for Spinning Plates Press (useful for local search), add `streetAddress`, `addressLocality`, `postalCode` and `telephone` to the `Organization` entry in the structured data. They were left out because they are not published anywhere on the page.
+
+To check it after deploying, paste the address into Google's Rich Results Test (search.google.com/test/rich-results) and the Schema Markup Validator (validator.schema.org).
