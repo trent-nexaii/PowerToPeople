@@ -596,6 +596,7 @@
     .thanks { font-size: 1.1rem; }
     .thanks h3 { font-size: 1.6rem; color: var(--green); margin-bottom: 0.4em; }
     .thanks .small { font-size: 0.95rem; margin-top: 1rem; }
+    .form-panel a { color: var(--green); }
     [hidden] { display: none !important; }
 
     /* Honeypot: hidden from people, present for spam robots. */
@@ -782,6 +783,12 @@
               <p>You will receive one email when <em>Power to the People</em> is ready to order in October 2026, with a link to the Spinning Plates Press website. There is nothing else to do for now.</p>
               <p class="small">Entered the wrong address? Reload this page and sign up again.</p>
             </div>
+
+            <div class="thanks" id="fallback" hidden tabindex="-1">
+              <h3>One more step</h3>
+              <p>Your email app should have opened with a message ready to go. Press <strong>Send</strong> and you are on the list.</p>
+              <p class="small">If nothing opened, send a short email to <a id="fallback-link" href="#">the publisher</a> and we will add you.</p>
+            </div>
           </div>
           <div class="signup-cover">
             <img src="images/cover.jpg" width="661" height="943" loading="lazy" decoding="async" alt="">
@@ -820,17 +827,26 @@
     //    Follow README.md section 2. It gives you a web app address like
     //    "https://script.google.com/macros/s/AKfycb.../exec".
     //    Paste it between the quotes below. The receiving email address is
-    //    set inside the script, on Google's side, never in this page.
+    //    set inside the script, on Google's side (see RECIPIENT there).
     //
     //  Netlify Forms (if the site is hosted on Netlify):
     //    Set FORM_ENDPOINT to "NETLIFY" and add
     //    name="notify" data-netlify="true" netlify-honeypot="bot-field"
     //    to the <form> tag above.
     //
-    //  While it is still "REPLACE_ME" nothing is sent anywhere, but the
-    //  thank-you message is shown so the page can be previewed.
+    //  While it is still "REPLACE_ME", the page does NOT pretend to have
+    //  saved the address. Instead it opens the visitor's own email app
+    //  with a message addressed to the publisher, so no sign-up is lost.
     // ==================================================================
     const FORM_ENDPOINT = "REPLACE_ME";
+
+    // The publisher's inbox, used only for the email-app fallback and for the
+    // "email us" link if sending fails. Kept in two parts so address-
+    // harvesting robots that scan the page source do not pick it up.
+    const PUBLISHER_MAILBOX = ["spinningplatespress", "icloud.com"].join("@");
+
+    // Give up on a send after this long and let the visitor try again.
+    const REQUEST_TIMEOUT_MS = 15000;
 
     (function () {
       var form     = document.getElementById("notify-form");
@@ -838,17 +854,37 @@
       var error    = document.getElementById("email-error");
       var button   = document.getElementById("submit-btn");
       var thanks   = document.getElementById("thanks");
+      var fallback = document.getElementById("fallback");
+      var fallbackLink = document.getElementById("fallback-link");
       var jumpLink = document.getElementById("jump-to-form");
 
+      var BUTTON_LABEL    = "Notify me when it's available";
       var INVALID_MESSAGE = "Please enter a valid email address, e.g. name@example.com";
+      var FAILED_MESSAGE  = "Sorry, something went wrong and your address was not saved. Please try again in a moment, or email us at ";
+      var MAIL_SUBJECT    = "Please notify me when Power to the People is available";
 
       // Plain-English check: something @ something . something, no spaces.
       function looksLikeEmail(value) {
         return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
       }
 
-      function showError(message) {
+      function mailtoLink(fromAddress) {
+        var body = "Please let me know when Power to the People by Gillian Tompsett " +
+                   "is available to order.\n\nMy email address: " + (fromAddress || "");
+        return "mailto:" + PUBLISHER_MAILBOX +
+               "?subject=" + encodeURIComponent(MAIL_SUBJECT) +
+               "&body=" + encodeURIComponent(body);
+      }
+
+      function showError(message, withMailLink) {
         error.textContent = message;
+        if (withMailLink) {
+          var a = document.createElement("a");
+          a.href = mailtoLink(email.value.trim());
+          a.textContent = PUBLISHER_MAILBOX;
+          error.appendChild(a);
+          error.appendChild(document.createTextNode("."));
+        }
         email.setAttribute("aria-invalid", "true");
       }
 
@@ -857,10 +893,70 @@
         email.removeAttribute("aria-invalid");
       }
 
+      function resetButton() {
+        button.disabled = false;
+        button.textContent = BUTTON_LABEL;
+      }
+
       function showThanks() {
         form.hidden = true;
         thanks.hidden = false;
         thanks.focus();
+      }
+
+      // No endpoint configured: hand the sign-up to the visitor's email app
+      // rather than silently dropping it.
+      function sendByEmailApp(value) {
+        var link = mailtoLink(value);
+        fallbackLink.href = link;
+        fallbackLink.textContent = PUBLISHER_MAILBOX;
+        form.hidden = true;
+        fallback.hidden = false;
+        fallback.focus();
+        window.location.href = link;
+      }
+
+      // Sends the address to FORM_ENDPOINT. Resolves only when the server
+      // confirms it was saved; rejects on any error, timeout or unexpected
+      // answer (for example a sign-in page instead of the script's JSON).
+      function send(value) {
+        var controller = typeof AbortController === "function" ? new AbortController() : null;
+        var timer = controller ? setTimeout(function () { controller.abort(); }, REQUEST_TIMEOUT_MS) : null;
+        var options = { method: "POST", signal: controller ? controller.signal : undefined };
+        var url;
+
+        if (FORM_ENDPOINT === "NETLIFY") {
+          // Netlify Forms: post URL-encoded data back to this page.
+          var body = new URLSearchParams();
+          body.append("form-name", form.getAttribute("name") || "notify");
+          body.append("email", value);
+          body.append("bot-field", "");
+          options.headers = { "Content-Type": "application/x-www-form-urlencoded" };
+          options.body = body.toString();
+          url = window.location.pathname;
+        } else {
+          // Google Apps Script web app. A plain form post needs no extra
+          // permission from the server, and the script reads e.parameter.
+          var data = new FormData();
+          data.append("email", value);
+          data.append("bot-field", "");
+          options.body = data;
+          url = FORM_ENDPOINT;
+        }
+
+        return fetch(url, options).then(function (response) {
+          if (timer) clearTimeout(timer);
+          if (!response.ok) throw new Error("Server responded " + response.status);
+          if (FORM_ENDPOINT === "NETLIFY") return;          // Netlify answers with a page
+          var type = response.headers.get("content-type") || "";
+          if (type.indexOf("json") === -1) throw new Error("Unexpected reply (" + (type || "no content type") + ")");
+          return response.json().then(function (result) {
+            if (!result || result.ok !== true) throw new Error((result && result.error) || "rejected");
+          });
+        }, function (err) {
+          if (timer) clearTimeout(timer);
+          throw err;
+        });
       }
 
       // Hero button: scroll to the sign-up section (smoothly unless the
@@ -883,6 +979,7 @@
 
       form.addEventListener("submit", function (event) {
         event.preventDefault();
+        if (button.disabled) return;                       // a send is already in progress
 
         var value = email.value.trim();
         if (!looksLikeEmail(value)) {
@@ -895,53 +992,19 @@
         // A filled-in honeypot means a robot. Pretend it worked and send nothing.
         if (form.elements["bot-field"].value) { showThanks(); return; }
 
-        // Preview mode: endpoint not set yet.
-        if (FORM_ENDPOINT === "REPLACE_ME") {
-          console.info("FORM_ENDPOINT is not set. Showing the thank-you message without sending.");
-          showThanks();
-          return;
-        }
+        // Nowhere to send yet: use the visitor's email app instead.
+        if (FORM_ENDPOINT === "REPLACE_ME") { sendByEmailApp(value); return; }
 
         button.disabled = true;
         button.textContent = "Sending…";
 
-        var request;
-        if (FORM_ENDPOINT === "NETLIFY") {
-          // Netlify Forms: post URL-encoded data back to this page.
-          var body = new URLSearchParams();
-          body.append("form-name", form.getAttribute("name") || "notify");
-          body.append("email", value);
-          body.append("bot-field", "");
-          request = fetch(window.location.pathname, {
-            method: "POST",
-            headers: { "Content-Type": "application/x-www-form-urlencoded" },
-            body: body.toString()
-          });
-        } else {
-          // Google Apps Script web app (or any endpoint that accepts a plain
-          // form post). Sent as a simple form post so the browser needs no
-          // extra permission from the server.
-          var data = new FormData();
-          data.append("email", value);
-          data.append("bot-field", "");
-          request = fetch(FORM_ENDPOINT, { method: "POST", body: data });
-        }
-
-        request.then(function (response) {
-          if (!response.ok) throw new Error("Server responded " + response.status);
-          // Apps Script answers with JSON; Netlify answers with a page.
-          var type = response.headers.get("content-type") || "";
-          if (type.indexOf("json") !== -1) {
-            return response.json().then(function (result) {
-              if (result && result.ok === false) throw new Error(result.error || "rejected");
-            });
-          }
-        }).then(function () {
+        send(value).then(function () {
           showThanks();
-        }).catch(function () {
-          button.disabled = false;
-          button.textContent = "Notify me when it's available";
-          showError("Sorry, something went wrong and your address was not saved. Please try again in a moment.");
+        }, function (err) {
+          if (window.console && console.warn) console.warn("Sign-up could not be sent:", err);
+          resetButton();
+          showError(FAILED_MESSAGE, true);
+          email.focus();
         });
       });
     })();
