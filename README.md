@@ -44,7 +44,7 @@ Nothing in `index.html` needs to change. Tips:
 
 ## 2. Setting up the email sign-up form
 
-**Until the steps below are done, no sign-up is emailed anywhere.** The page knows this: instead of showing "Thank you", it opens the visitor's own email app with a message addressed to spinningplatespress@icloud.com, so sign-ups are not lost in the meantime. That is a stop-gap, not the finished thing, because it depends on the visitor having an email app set up.
+**Until the steps below are done, no sign-up is emailed anywhere.** The page knows this: instead of showing "Thank you", it opens the visitor's own email app with a message addressed to trentpinet@gmail.com, so sign-ups are not lost in the meantime. That is a stop-gap, not the finished thing, because it depends on the visitor having an email app set up.
 
 To receive sign-ups automatically, the page needs somewhere to send them. The recommended way uses a small script inside a Google account: each sign-up is emailed to the address you choose and added to a Google Sheet, so you also have a list to write to when the book launches. The receiving address is stored in the script on Google's side. It is never written into the page or into these files, so visitors cannot see it.
 
@@ -58,12 +58,12 @@ You need a Google account (a Gmail address, or any account you use for Google Dr
 4. Near the top of the pasted code, check this line:
 
    ```
-   var RECIPIENT = "spinningplatespress@icloud.com";
+   var RECIPIENT = "trentpinet@gmail.com";
    ```
 
-   That is the inbox that will receive every sign-up. Change it only if the sign-ups should go somewhere else. Keep the quotes.
+   That is the inbox that will receive every sign-up. It is currently set to a test address; **before the book goes on sale, change it to `spinningplatespress@icloud.com`** (here and in the `PUBLISHER_MAILBOX` line near the bottom of `index.html`), then deploy a new version as described in the notes below. Keep the quotes.
 5. Click the **save** icon (or press Ctrl+S / Cmd+S).
-6. **Send a test email first.** In the toolbar above the code, there is a drop-down that says `doPost`. Change it to `sendTestEmail` and click **Run**. Google asks you to authorise the script: choose your account, and if it shows a warning that the app isn't verified, click **Advanced**, then **Go to … (unsafe)**, then **Allow**. (This warning appears because you wrote the script yourself; it is yours.) Within a minute a message with the subject "Test: New sign-up for Power to the People" should arrive at spinningplatespress@icloud.com. Check the junk folder too. **If it does not arrive, stop here**: the script has not been authorised, and nothing after this will work either.
+6. **Send a test email first.** In the toolbar above the code, there is a drop-down that says `doPost`. Change it to `sendTestEmail` and click **Run**. Google asks you to authorise the script: choose your account, and if it shows a warning that the app isn't verified, click **Advanced**, then **Go to … (unsafe)**, then **Allow**. (This warning appears because you wrote the script yourself; it is yours.) Within a minute a message with the subject "Test: New sign-up for Power to the People" should arrive at trentpinet@gmail.com. Check the junk folder too. **If it does not arrive, stop here**: the script has not been authorised, and nothing after this will work either.
 7. Click the blue **Deploy** button at the top right, then **New deployment**.
 8. Click the gear icon next to "Select type" and choose **Web app**. Fill in:
    - Description: anything, for example "Sign-up form".
@@ -83,13 +83,13 @@ You need a Google account (a Gmail address, or any account you use for Google Dr
     const FORM_ENDPOINT = "https://script.google.com/macros/s/AKfycb.../exec";
     ```
 
-12. Save the file and publish it (section 3). Test it by entering your own email address on the page. The button reads "Sending…" for a moment, then "Thank you" appears. Within a minute a message with the subject "New sign-up for Power to the People" arrives at spinningplatespress@icloud.com, and a new row appears in the spreadsheet under a tab called "Sign-ups".
+12. Save the file and publish it (section 3). Test it by entering your own email address on the page. The button reads "Sending…" for a moment, then "Thank you" appears. Within a minute a message with the subject "New sign-up for Power to the People" arrives at trentpinet@gmail.com, and a new row appears in the spreadsheet under a tab called "Sign-ups".
 
 If something is wrong:
 
 - **The page opens your email app instead of showing "Thank you".** The `FORM_ENDPOINT` line in `index.html` still says `REPLACE_ME`, or the version with the URL has not been published yet.
 - **"Sorry, something went wrong" appears on the page.** The page reached the address but did not get a proper answer. Check the URL you pasted is the one ending in `/exec` (not `/dev`), that the deployment has **Who has access: Anyone**, and that you authorised the script (step 6). After changing the script's settings, deploy a **New version** (see the notes below).
-- **"Thank you" appears but no email arrives.** Check the junk folder at spinningplatespress@icloud.com. Then open the Apps Script editor and click **Executions** in the left-hand menu: each sign-up is listed there, and a failed one shows the reason. If the Sheet tab "Sign-ups" has the row but no email came, the script is being blocked from sending; run `sendTestEmail` again (step 6).
+- **"Thank you" appears but no email arrives.** Check the junk folder at trentpinet@gmail.com. Then open the Apps Script editor and click **Executions** in the left-hand menu: each sign-up is listed there, and a failed one shows the reason. If the Sheet tab "Sign-ups" has the row but no email came, the script is being blocked from sending; run `sendTestEmail` again (step 6).
 - **The page never pretends.** "Thank you" is shown only after the script confirms it has recorded the address, so a sign-up that reaches "Thank you" has been received.
 
 Notes:
