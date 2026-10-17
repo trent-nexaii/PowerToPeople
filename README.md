@@ -44,7 +44,7 @@ Nothing in `index.html` needs to change. Tips:
 
 ## 2. The email sign-up form
 
-Each sign-up is emailed to the address set in `index.html` (the `PUBLISHER_MAILBOX` line near the bottom, currently the test address trentpinet@gmail.com). **Before the book goes on sale, change that line to the publisher's inbox**, `["spinningplatespress", "icloud.com"]`, and publish the page again. The address is written in two parts so that robots scanning the page for email addresses do not pick it up.
+Each sign-up is emailed to the address set in `index.html` (the `PUBLISHER_MAILBOX` line near the bottom, currently spinningplatespress@icloud.com). To send sign-ups somewhere else, change that line, written as two parts such as `["name", "example.com"]`, and publish the page again. The address is written in two parts so that robots scanning the page for email addresses do not pick it up.
 
 The page can deliver sign-ups three ways. Option A is switched on and needs no account; the others are there if you want them later.
 
@@ -77,10 +77,10 @@ You need a Google account (a Gmail address, or any account you use for Google Dr
 4. Near the top of the pasted code, check this line:
 
    ```
-   var RECIPIENT = "trentpinet@gmail.com";
+   var RECIPIENT = "spinningplatespress@icloud.com";
    ```
 
-   That is the inbox that will receive every sign-up. It is currently the test address; set it to the publisher's inbox before launch. Keep the quotes.
+   That is the inbox that will receive every sign-up. Change it only if they should go somewhere else. Keep the quotes.
 5. Click the **save** icon (or press Ctrl+S / Cmd+S).
 6. **Send a test email first.** In the toolbar above the code, there is a drop-down that says `doPost`. Change it to `sendTestEmail` and click **Run**. Google asks you to authorise the script: choose your account, and if it shows a warning that the app isn't verified, click **Advanced**, then **Go to … (unsafe)**, then **Allow**. (This warning appears because you wrote the script yourself; it is yours.) Within a minute a message with the subject "Test: New sign-up for Power to the People" should arrive. Check the junk folder too. **If it does not arrive, stop here**: the script has not been authorised, and nothing after this will work either.
 7. Click the blue **Deploy** button at the top right, then **New deployment**.
