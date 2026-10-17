@@ -869,6 +869,7 @@
       var FAILED_MESSAGE  = "Sorry, something went wrong and your address was not saved. Please try again in a moment, or email us at ";
       var MAIL_SUBJECT    = "Please notify me when Power to the People is available";
       var RELAY_SUBJECT   = "New sign-up for Power to the People";
+      var ACTIVATION_MESSAGE = "Thank you. This form is still waiting for its one-time activation by the site owner, so your address has not been delivered yet. Please try again shortly, or email us at ";
 
       // Plain-English check: something @ something . something, no spaces.
       function looksLikeEmail(value) {
@@ -965,17 +966,29 @@
 
         return fetch(url, options).then(function (response) {
           if (timer) clearTimeout(timer);
-          if (!response.ok) throw new Error("Server responded " + response.status);
-          if (FORM_ENDPOINT === "NETLIFY") return;          // Netlify answers with a page
+          if (FORM_ENDPOINT === "NETLIFY") {                // Netlify answers with a page
+            if (!response.ok) throw new Error("Server responded " + response.status);
+            return;
+          }
           var type = response.headers.get("content-type") || "";
-          if (type.indexOf("json") === -1) throw new Error("Unexpected reply (" + (type || "no content type") + ")");
-          return response.json().then(function (result) {
-            if (!result) throw new Error("empty reply");
+          // Read the body even on an error status, so the reason can be logged.
+          return response.text().then(function (text) {
+            var result = null;
+            try { result = JSON.parse(text); } catch (e) { /* not JSON */ }
+            if (window.console && console.info) console.info("Sign-up reply:", response.status, text.slice(0, 300));
+            var message = (result && (result.message || result.error)) || "";
+            if (/activat/i.test(message)) {
+              var pending = new Error(message);
+              pending.code = "activation";
+              throw pending;
+            }
+            if (!response.ok) throw new Error("Server responded " + response.status + (message ? ": " + message : ""));
+            if (!result || type.indexOf("json") === -1) throw new Error("Unexpected reply (" + (type || "no content type") + ")");
             if (FORM_ENDPOINT === "FORMSUBMIT") {
               // FormSubmit answers {"success":"true"|"false","message":"..."}.
-              if (String(result.success) !== "true") throw new Error(result.message || "rejected");
+              if (String(result.success) !== "true") throw new Error(message || "rejected");
             } else if (result.ok !== true) {
-              throw new Error(result.error || "rejected");
+              throw new Error(message || "rejected");
             }
           });
         }, function (err) {
@@ -1028,7 +1041,7 @@
         }, function (err) {
           if (window.console && console.warn) console.warn("Sign-up could not be sent:", err);
           resetButton();
-          showError(FAILED_MESSAGE, true);
+          showError(err && err.code === "activation" ? ACTIVATION_MESSAGE : FAILED_MESSAGE, true);
           email.focus();
         });
       });
