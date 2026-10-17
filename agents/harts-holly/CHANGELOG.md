@@ -2,9 +2,26 @@
 
 Source: Karen's email re. (1) Holly switching to a foreign language on the call at 13:34:03, and (2) "Adrienne" alone not being recognised while "Adrienne Allen" works.
 
-Note: the 13:34:03 recording could not be transcribed in the build environment, so issue 1 is diagnosed from the prompt and the platform setup, not from hearing the call.
+## What the recording shows (call at 13:34, transcribed from the WAV; Holly is the right-hand channel)
+
+| Time | Who | What |
+|---|---|---|
+| 2-6s | Holly | "Hello, you've reached Harts. This is Holly. Who would you like to speak with?" |
+| 6.5-8s | Caller | "Adrienne, please" (rough transcription, 8 kHz audio) |
+| 10.5-13s | Holly | "Just to confirm, that's Adrienne Allen?" |
+| 13.5s | Caller | "Yes." |
+| 14-19s | Holly | ~5 s silence (lookup running) |
+| 19-23s | Holly | **Turkish:** "...bekleyin. Şu anda sizi bağlamak için gereken bilgileri alıyorum." = "...please wait. I'm currently getting the information needed to connect you." |
+
+Findings:
+- The switch is **not** in response to the caller. The caller spoke English and Holly's own opening was English. The Turkish is a status/filler line spoken **after the tool call**, which is a line the prompt never told her to say. It is either the model narrating the lookup and drifting language, or a platform-generated "please wait" message with a wrong language setting. Check the platform transcript for that turn: if the Turkish text is in the assistant's turn it is the model; if it only appears in the audio/event log it is a platform filler or TTS setting.
+- Holly echoed "Just to confirm, that's Adrienne Allen?" for a plain first-name request. The v1 prompt only allows that for the Confusable groups ("NO confirmation and NO echo" for every other name), and the wording matches the example in the prompt. It cost a turn and a second "Yes".
 
 ## Issue 1 - Foreign language mid-call
+
+New in v2 from the recording:
+- Style rule: during a lookup, status check or transfer, say nothing or only "One moment." Never narrate. Filler is always English.
+- Name Matching step 3: explicit ban on "Just to confirm" / echoing the full name outside the Confusable groups.
 
 Causes found in the v1 prompt:
 - Call Screening said "Use when clear for: name, reason, **language**, tone". That told the model to use a language from screening, in direct conflict with the English-only rule. Removed "language" and added "ignore any language information".
