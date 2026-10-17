@@ -44,7 +44,7 @@ Nothing in `index.html` needs to change. Tips:
 
 ## 2. The email sign-up form
 
-Each sign-up is emailed to the address set in `index.html` (the `PUBLISHER_MAILBOX` line near the bottom, currently spinningplatespress@icloud.com). To send sign-ups somewhere else, change that line, written as two parts such as `["name", "example.com"]`, and publish the page again. The address is written in two parts so that robots scanning the page for email addresses do not pick it up.
+Each sign-up is emailed to the address set in `index.html` (the `PUBLISHER_MAILBOX` line near the bottom, currently the test address nadean21883d@5sh.lowdn.com; **before launch, change it back to the publisher's inbox**, `["spinningplatespress", "icloud.com"]`). To send sign-ups somewhere else, change that line, written as two parts such as `["name", "example.com"]`, and publish the page again. The address is written in two parts so that robots scanning the page for email addresses do not pick it up.
 
 The page can deliver sign-ups three ways. Option A is switched on and needs no account; the others are there if you want them later.
 
@@ -77,7 +77,7 @@ You need a Google account (a Gmail address, or any account you use for Google Dr
 4. Near the top of the pasted code, check this line:
 
    ```
-   var RECIPIENT = "spinningplatespress@icloud.com";
+   var RECIPIENT = "nadean21883d@5sh.lowdn.com";
    ```
 
    That is the inbox that will receive every sign-up. Change it only if they should go somewhere else. Keep the quotes.

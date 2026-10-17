@@ -20,7 +20,7 @@
 // ---- Settings -------------------------------------------------------------
 
 // The inbox that receives a message for every sign-up.
-var RECIPIENT = "spinningplatespress@icloud.com";
+var RECIPIENT = "nadean21883d@5sh.lowdn.com";
 
 // Subject line of those messages.
 var SUBJECT = "New sign-up for Power to the People";
