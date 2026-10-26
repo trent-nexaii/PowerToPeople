@@ -84,7 +84,7 @@ function doPost(e) {
         body:
           "Thank you for your interest in Power to the People by Gillian Tompsett.\n\n" +
           "We will send you one email when the book is available to order from " +
-          "Spinning Plates Press in October 2026.\n\n" +
+          "Spinning Plates Press in November 2026.\n\n" +
           "If you did not sign up for this, please ignore this message."
       });
     }
