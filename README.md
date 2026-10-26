@@ -66,6 +66,8 @@ Notes:
 - If "We couldn't confirm your sign-up" appears, the endpoint could not verify acceptance. An email may still have arrived if the response was lost; the endpoint does not retry automatically. Check the Vercel function status and FormSubmit inbox activation before retrying.
 - The page never pretends: "Thank you" appears only after FormSubmit confirms it accepted the submission.
 
+To check that Vercel deployed the function, open `/api/notify` in the browser. It should return `{"service":"notify","version":2}` without sending an email. A 404 or an HTML page means the function is not being served: check Vercel's framework preset, root/output directory and the production deployment commit. If it returns the JSON but a submission fails, inspect the `notify:` entries in Vercel's function logs. They distinguish relay rejection, activation, non-JSON replies and connection failures without logging subscriber addresses.
+
 ### Option B — Google Sheet and script (private, keeps a list, about ten minutes)
 
 A small script inside your own Google account receives each sign-up, emails it to you and adds a row to a Google Sheet, so you also have a list to write to when the book launches. Nothing passes through a third party.

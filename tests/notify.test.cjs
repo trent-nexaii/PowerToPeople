@@ -68,7 +68,7 @@ test('sign-up endpoint', async t => {
     await t.test(`unconfirmed delivery (${reply.message || 'non-JSON'}) is not retried`, async () => {
       const res = await run(reply);
       assert.equal(res.statusCode, 502);
-      assert.deepEqual(res.body, { ok: false, code: 'unconfirmed' });
+      assert.deepEqual(res.body, { ok: false, code: reply instanceof Error ? 'unconfirmed' : 'relay_invalid_response' });
       assert.equal(requests.length, 1);
     });
   }
@@ -89,8 +89,15 @@ test('sign-up endpoint', async t => {
 
   await t.test('GET requests cannot trigger email', async () => {
     const res = await run({}, { method: 'GET' });
+    assert.equal(res.statusCode, 200);
+    assert.deepEqual(res.body, { service: 'notify', version: 2 });
+    assert.equal(requests.length, 0);
+  });
+
+  await t.test('unsupported methods cannot trigger email', async () => {
+    const res = await run({}, { method: 'DELETE' });
     assert.equal(res.statusCode, 405);
-    assert.equal(res.headers.Allow, 'POST');
+    assert.equal(res.headers.Allow, 'GET, POST');
     assert.equal(requests.length, 0);
   });
 });
