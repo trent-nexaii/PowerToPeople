@@ -2,7 +2,7 @@
 
 A single-page website for *Power to the People: The Ministry of Works and Construction of the Tongariro Power Development* by Gillian Tompsett (Spinning Plates Press, 2026).
 
-The whole site is three things:
+The site files are:
 
 ```
 index.html          the page (all styling and script are inside this one file)
@@ -12,12 +12,11 @@ images/author.jpg   author portrait (portrait or square)
 images/share.jpg    the picture shown when the link is shared (made from the cover)
 robots.txt          tells search engines they may index the page
 sitemap.xml         lists the page and its pictures for search engines
-api/notify.js       Vercel function that forwards sign-ups to FormSubmit
 apps-script/Code.gs optional Google Apps Script alternative (see section 2)
 README.md           this file
 ```
 
-To look at it, double-click `index.html` and it opens in your web browser. No installation is needed.
+To preview the layout, double-click `index.html` and it opens in your web browser. No installation is needed to run the site. Test sign-ups on the deployed HTTPS site so the relay can redirect back to it.
 
 The three images were taken from the sell sheet PDF, so the page already shows the real cover, the Moawhango Dam crew photo and the author's portrait. If you have larger originals (the versions sent to the printer, for example), swap them in using the steps below and the page will look sharper on big screens.
 
@@ -45,13 +44,13 @@ Nothing in `index.html` needs to change. Tips:
 
 ## 2. The email sign-up form
 
-Each sign-up is emailed to spinningplatespress@icloud.com. For the default Vercel workflow, the recipient is fixed in `api/notify.js`. To change it, update that endpoint and the `PUBLISHER_MAILBOX` email fallback in `index.html`, then deploy again.
+Each sign-up is emailed to spinningplatespress@icloud.com. To change the recipient, update both the form's `action` URL and `PUBLISHER_MAILBOX` in `index.html`, then deploy again.
 
 The page can deliver sign-ups three ways. Option A is switched on and needs no account; the others are there if you want them later.
 
-### Option A — FormSubmit through Vercel (switched on, nothing to install)
+### Option A — FormSubmit browser form (switched on, nothing to install)
 
-The browser posts to `/api/notify` on this website. That Vercel function forwards the address to <https://formsubmit.co>, a free email relay, and returns a confirmed success or error. This avoids browser cross-origin failures after an email has already been delivered. There is no account or API key to create. Deploy the whole repository to Vercel so both the page and `api/notify.js` are included; a static-only server cannot run this endpoint.
+The browser submits a regular HTML form to <https://formsubmit.co>, a free email relay. After accepting it, FormSubmit redirects to this site's `?signup=success#signup` URL, which displays the thank-you message. This avoids the confirmed HTTP 403 on requests from Vercel's servers and avoids browser AJAX/CORS response handling. There is no account, API key or server function to configure. The email address travels in the POST body, not in the return URL.
 
 1. Publish the page (section 3).
 2. Open the live page, enter your own email address in the form and press the button. After activation, confirmed acceptance shows "Thank you for signing up!".
@@ -63,10 +62,10 @@ If you change the inbox address later, FormSubmit sends a fresh activation email
 Notes:
 
 - FormSubmit's free service has no fixed cap on submissions and keeps no public list; each one is simply forwarded. If you want a spreadsheet of sign-ups as well, use option B, or make a Gmail filter that labels these messages.
-- If "We couldn't confirm your sign-up" appears, the endpoint could not verify acceptance. An email may still have arrived if the response was lost; the endpoint does not retry automatically. Check the Vercel function status and FormSubmit inbox activation before retrying.
-- The page never pretends: "Thank you" appears only after FormSubmit confirms it accepted the submission.
+- A FormSubmit activation or error page remains visible if the service cannot accept the form; the site does not turn that into a success or automatically retry.
+- The thank-you message is displayed on the relay's success redirect. Reloading clears it and shows the form again, so a visitor can enter a different address.
 
-To check that Vercel deployed the function, open `/api/notify` in the browser. It should return `{"service":"notify","version":2}` without sending an email. A 404 or an HTML page means the function is not being served: check Vercel's framework preset, root/output directory and the production deployment commit. If it returns the JSON but a submission fails, inspect the `notify:` entries in Vercel's function logs. They distinguish relay rejection, activation, non-JSON replies and connection failures without logging subscriber addresses.
+The previous `/api/notify` server relay has been removed because FormSubmit rejected its requests with HTTP 403. Signup now navigates directly to FormSubmit and back; that endpoint is no longer used.
 
 ### Option B — Google Sheet and script (private, keeps a list, about ten minutes)
 
@@ -145,9 +144,9 @@ Either way, the form already includes a hidden "honeypot" field that catches mos
 
 ### Vercel (current hosting)
 
-Connect this GitHub repository to Vercel with `main` as the production branch. Use the **Other** framework preset, repository root as the root directory, and no build command or custom output directory. Vercel serves the static page and deploys `api/notify.js` automatically. Pushing to `main` triggers a new production deployment. No email secrets are needed for the FormSubmit relay.
+Connect this GitHub repository to Vercel with `main` as the production branch. Use the **Other** framework preset, repository root as the root directory, and no build command or custom output directory. Vercel serves the static site. Pushing to `main` triggers a new production deployment. No email secrets are needed for the FormSubmit relay.
 
-The page can also use the alternative hosts below, but their sign-up configuration must be changed: use option C for Netlify or option B for GitHub Pages. Neither runs the Vercel endpoint.
+The default FormSubmit browser form also works on the static hosts below. Option C is available for Netlify's own form service, and option B provides the Google Sheets alternative.
 
 ### Netlify (drag and drop, about five minutes)
 
@@ -172,7 +171,7 @@ The page can also use the alternative hosts below, but their sign-up configurati
 
 ## Checking the page before you share it
 
-Run `node --test tests/notify.test.cjs` to check relay acceptance, rejection, activation, invalid input and uncertain delivery without sending real emails. A plain static server can preview layout, but live sign-up testing requires the Vercel endpoint (or `vercel dev`).
+For automated browser checks, run `npm ci`, `npx playwright install chromium`, then `npm test`. To use an already installed Chromium, set `CHROMIUM_PATH` to its executable when running `npm test`. Tests check desktop and mobile form validation, single-request submission, correct POST fields, acceptance redirects, rejected/activation pages, and returning to the form. They intercept the provider request and send no real emails; live service acceptance is a separate check on the deployed site.
 
 Open the page and look for these things:
 

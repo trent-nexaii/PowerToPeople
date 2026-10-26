@@ -760,7 +760,12 @@
           <div class="form-panel">
             <!-- For Netlify Forms, add:  name="notify" data-netlify="true" netlify-honeypot="bot-field"
                  to this <form> tag and set FORM_ENDPOINT to "NETLIFY" in the script below. -->
-            <form id="notify-form" method="post" action="#" novalidate>
+            <form id="notify-form" method="post" action="https://formsubmit.co/spinningplatespress@icloud.com" novalidate>
+              <input type="hidden" name="_subject" value="New sign-up for Power to the People">
+              <input type="hidden" name="_template" value="table">
+              <input type="hidden" name="_captcha" value="false">
+              <input type="hidden" name="_next" value="https://www.spinningplatespress.co.nz/?signup=success#signup">
+              <input type="hidden" name="_replyto" value="">
               <label for="email">Your email address</label>
               <p class="hint" id="email-hint">We'll only email you about this book.</p>
               <input type="email" id="email" name="email"
@@ -822,10 +827,9 @@
     // ==================================================================
     //  FORM ENDPOINT — where each sign-up is sent. One of:
     //
-    //  "FORMSUBMIT"  (current) /api/notify on Vercel forwards to the free
-    //                relay at formsubmit.co, which emails each
-    //                sign-up to the inbox fixed in api/notify.js. Deploy
-    //                the whole repository to Vercel. No API key is needed.
+    //  "FORMSUBMIT"  (current) A standard browser form POST to FormSubmit.
+    //                It redirects back here after accepting the submission.
+    //                No AJAX, server function or API key is needed.
     //                The first submission makes
     //                FormSubmit send an activation email to that inbox;
     //                click the link in it once and every later sign-up is
@@ -848,8 +852,8 @@
     const FORM_ENDPOINT = "FORMSUBMIT";
 
     // The inbox that receives sign-ups through FormSubmit, and the address
-    // behind the email-app fallback and the "email us" link. Kept in two
-    // parts so address-harvesting robots scanning the page source miss it.
+    // behind the email-app fallback and the "email us" link. Keep this in
+    // sync with the form action above if the recipient changes.
     const PUBLISHER_MAILBOX = ["spinningplatespress", "icloud.com"].join("@");
 
     // Give up on a send after this long and let the visitor try again.
@@ -913,6 +917,31 @@
         thanks.focus();
       }
 
+      // FormSubmit's _next redirect returns here after an accepted form.
+      // Remove the marker so reloading lets the visitor enter a new address.
+      var returned = new URL(window.location.href);
+      if (FORM_ENDPOINT === "FORMSUBMIT" && returned.searchParams.get("signup") === "success") {
+        showThanks();
+        returned.searchParams.delete("signup");
+        if (history.replaceState) history.replaceState(null, "", returned.pathname + returned.search + returned.hash);
+      }
+
+      // Restore the button if the visitor goes back from the relay's page.
+      window.addEventListener("pageshow", resetButton);
+
+      function sendByBrowser(value) {
+        var next = new URL(window.location.href);
+        next.searchParams.set("signup", "success");
+        next.hash = "signup";
+        form.action = "https://formsubmit.co/" + PUBLISHER_MAILBOX;
+        form.elements["_next"].value = next.href;
+        form.elements["_replyto"].value = value;
+        email.value = value;
+        // Navigate with a regular POST; do not fetch or retry. This avoids
+        // the confirmed 403 on server-to-server requests and needs no CORS.
+        HTMLFormElement.prototype.submit.call(form);
+      }
+
       // No endpoint configured: hand the sign-up to the visitor's email app
       // rather than silently dropping it.
       function sendByEmailApp(value) {
@@ -934,16 +963,7 @@
         var options = { method: "POST", signal: controller ? controller.signal : undefined };
         var url;
 
-        if (FORM_ENDPOINT === "FORMSUBMIT") {
-          // Use our Vercel endpoint so a cross-origin browser failure cannot
-          // hide a successful relay response. The server checks acceptance.
-          options.headers = { "Content-Type": "application/json", "Accept": "application/json" };
-          options.body = JSON.stringify({
-            email: value,
-            "bot-field": ""
-          });
-          url = "/api/notify";
-        } else if (FORM_ENDPOINT === "NETLIFY") {
+        if (FORM_ENDPOINT === "NETLIFY") {
           // Netlify Forms: post URL-encoded data back to this page.
           var body = new URLSearchParams();
           body.append("form-name", form.getAttribute("name") || "notify");
@@ -1030,6 +1050,8 @@
 
         button.disabled = true;
         button.textContent = "Sending…";
+
+        if (FORM_ENDPOINT === "FORMSUBMIT") { sendByBrowser(value); return; }
 
         send(value).then(function () {
           showThanks();

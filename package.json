@@ -1,0 +1,10 @@
+{
+  "name": "power-to-the-people",
+  "private": true,
+  "scripts": {
+    "test": "node --test tests/signup.test.cjs"
+  },
+  "devDependencies": {
+    "playwright": "1.56.1"
+  }
+}
