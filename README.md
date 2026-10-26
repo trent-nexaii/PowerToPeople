@@ -63,6 +63,7 @@ Notes:
 
 - FormSubmit's free service has no fixed cap on submissions and keeps no public list; each one is simply forwarded. If you want a spreadsheet of sign-ups as well, use option B, or make a Gmail filter that labels these messages.
 - A FormSubmit activation or error page remains visible if the service cannot accept the form; the site does not turn that into a success or automatically retry.
+- If navigation is blocked or stalls for 15 seconds, the page stops waiting, restores the button and offers a direct email link. Because the relay may already have received the address, this recovery does not claim failure or success and does not resubmit automatically.
 - The thank-you message is displayed on the relay's success redirect. Reloading clears it and shows the form again, so a visitor can enter a different address.
 
 The previous `/api/notify` server relay has been removed because FormSubmit rejected its requests with HTTP 403. Signup now navigates directly to FormSubmit and back; that endpoint is no longer used.
@@ -171,7 +172,7 @@ The default FormSubmit browser form also works on the static hosts below. Option
 
 ## Checking the page before you share it
 
-For automated browser checks, run `npm ci`, `npx playwright install chromium`, then `npm test`. To use an already installed Chromium, set `CHROMIUM_PATH` to its executable when running `npm test`. Tests check desktop and mobile form validation, single-request submission, correct POST fields, acceptance redirects, rejected/activation pages, and returning to the form. They intercept the provider request and send no real emails; live service acceptance is a separate check on the deployed site.
+For automated browser checks, run `npm ci`, `npx playwright install chromium`, then `npm test`. To use an already installed Chromium, set `CHROMIUM_PATH` to its executable when running `npm test`. Tests check desktop and mobile form validation, single-request submission, correct POST fields, acceptance redirects, rejected/activation pages, returning to the form, and recovery from stalled or blocked navigation. They intercept the provider request and send no real emails; live service acceptance is a separate check on the deployed site.
 
 Open the page and look for these things:
 

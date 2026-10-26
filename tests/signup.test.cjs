@@ -22,7 +22,7 @@ test('browser signup uses native POST and the provider success redirect', async 
   t.after(() => browser.close());
 
   for (const width of [1280, 390]) {
-    for (const outcome of ['accepted', 'forbidden', 'activation']) {
+    for (const outcome of ['accepted', 'forbidden', 'activation', 'stalled', 'blocked-navigation']) {
       await t.test(`${width}px ${outcome}`, async () => {
         const page = await browser.newPage({ viewport: { width, height: 900 } });
         try {
@@ -44,6 +44,7 @@ test('browser signup uses native POST and the provider success redirect', async 
             assert.equal(fields.get('_subject'), 'New sign-up for Power to the People');
             assert.equal(fields.get('_captcha'), 'false');
             assert.equal(fields.get('_next'), origin + '/?source=test&signup=success#signup');
+            if (outcome === 'stalled') return; // Leave navigation pending.
             if (outcome === 'accepted') {
               await route.fulfill({ status: 303, headers: { Location: fields.get('_next') }, body: '' });
             } else {
@@ -57,10 +58,16 @@ test('browser signup uses native POST and the provider success redirect', async 
           assert.match(await page.locator('#email-error').innerText(), /valid email/);
           assert.equal(submissions, 0);
           await page.locator('#email').fill('  reader@example.com  ');
+          if (outcome === 'stalled') await page.clock.install();
+          if (outcome === 'blocked-navigation') {
+            await page.evaluate(() => {
+              HTMLFormElement.prototype.submit = function () { throw new Error('Navigation blocked'); };
+            });
+          }
           await page.evaluate(() => {
             const form = document.getElementById('notify-form');
             form.dispatchEvent(new Event('submit', { cancelable: true }));
-            form.dispatchEvent(new Event('submit', { cancelable: true }));
+            if (document.querySelector('#submit-btn').disabled) form.dispatchEvent(new Event('submit', { cancelable: true }));
           });
           if (outcome === 'accepted') {
             await page.locator('#thanks').waitFor({ state: 'visible' });
@@ -71,6 +78,15 @@ test('browser signup uses native POST and the provider success redirect', async 
             assert.equal(page.url(), origin + '/?source=test#signup');
             await page.reload();
             assert.equal(await page.locator('#notify-form').isVisible(), true);
+          } else if (outcome === 'stalled' || outcome === 'blocked-navigation') {
+            if (outcome === 'stalled') await page.clock.fastForward(16000);
+            await page.locator('#email-error').waitFor({ state: 'visible' });
+            assert.equal(await page.locator('#submit-btn').isEnabled(), true);
+            assert.notEqual(await page.locator('#submit-btn').innerText(), 'Sending…');
+            assert.equal(await page.locator('#notify-form').getAttribute('aria-busy'), null);
+            assert.equal(await page.locator('#thanks').isVisible(), false);
+            assert.match(await page.locator('#email-error a').getAttribute('href'), /^mailto:spinningplatespress@icloud.com/);
+            assert.match(await page.locator('#email-error a').getAttribute('href'), /reader%40example.com/);
           } else {
             await page.waitForURL('https://formsubmit.co/**');
             assert.match(await page.locator('h1').innerText(), new RegExp(outcome));
@@ -79,7 +95,7 @@ test('browser signup uses native POST and the provider success redirect', async 
             await page.locator('#submit-btn').waitFor({ state: 'visible' });
             assert.equal(await page.locator('#submit-btn').isEnabled(), true);
           }
-          assert.equal(submissions, 1, 'Duplicate clicks must not send duplicate email requests');
+          assert.equal(submissions, outcome === 'blocked-navigation' ? 0 : 1, 'Never send duplicate email requests');
           assert.deepEqual(errors, []);
         } finally {
           await page.close();

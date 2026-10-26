@@ -868,6 +868,7 @@
       var fallback = document.getElementById("fallback");
       var fallbackLink = document.getElementById("fallback-link");
       var jumpLink = document.getElementById("jump-to-form");
+      var browserSubmissionTimer = null;
 
       var BUTTON_LABEL    = "Notify me when it's available";
       var INVALID_MESSAGE = "Please enter a valid email address, e.g. name@example.com";
@@ -906,8 +907,11 @@
       }
 
       function resetButton() {
+        if (browserSubmissionTimer) clearTimeout(browserSubmissionTimer);
+        browserSubmissionTimer = null;
         button.disabled = false;
         button.textContent = BUTTON_LABEL;
+        form.removeAttribute("aria-busy");
       }
 
       function showThanks() {
@@ -939,7 +943,22 @@
         email.value = value;
         // Navigate with a regular POST; do not fetch or retry. This avoids
         // the confirmed 403 on server-to-server requests and needs no CORS.
-        HTMLFormElement.prototype.submit.call(form);
+        // A stalled or blocked navigation leaves this document alive. Always
+        // restore its controls and provide a working email fallback; never
+        // assume the relay accepted the request or resubmit automatically.
+        browserSubmissionTimer = setTimeout(function () {
+          window.stop(); // Cancel a pending navigation before restoring controls.
+          resetButton();
+          showError("The sign-up service hasn't responded. Your request may still be processing. You can contact us directly at ", true);
+          email.focus();
+        }, REQUEST_TIMEOUT_MS);
+        try {
+          HTMLFormElement.prototype.submit.call(form);
+        } catch (err) {
+          resetButton();
+          showError(FAILED_MESSAGE, true);
+          email.focus();
+        }
       }
 
       // No endpoint configured: hand the sign-up to the visitor's email app
@@ -1050,6 +1069,7 @@
 
         button.disabled = true;
         button.textContent = "Sending…";
+        form.setAttribute("aria-busy", "true");
 
         if (FORM_ENDPOINT === "FORMSUBMIT") { sendByBrowser(value); return; }
 
