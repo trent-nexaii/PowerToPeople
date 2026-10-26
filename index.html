@@ -822,9 +822,11 @@
     // ==================================================================
     //  FORM ENDPOINT — where each sign-up is sent. One of:
     //
-    //  "FORMSUBMIT"  (current) The free relay at formsubmit.co emails each
-    //                sign-up to PUBLISHER_MAILBOX below. No account and no
-    //                deployment needed. The first submission makes
+    //  "FORMSUBMIT"  (current) /api/notify on Vercel forwards to the free
+    //                relay at formsubmit.co, which emails each
+    //                sign-up to the inbox fixed in api/notify.js. Deploy
+    //                the whole repository to Vercel. No API key is needed.
+    //                The first submission makes
     //                FormSubmit send an activation email to that inbox;
     //                click the link in it once and every later sign-up is
     //                delivered. See README.md section 2, option A.
@@ -865,9 +867,8 @@
 
       var BUTTON_LABEL    = "Notify me when it's available";
       var INVALID_MESSAGE = "Please enter a valid email address, e.g. name@example.com";
-      var FAILED_MESSAGE  = "Sorry, something went wrong and your address was not saved. Please try again in a moment, or email us at ";
+      var FAILED_MESSAGE  = "We couldn't confirm your sign-up. Please try again in a moment, or email us at ";
       var MAIL_SUBJECT    = "Please notify me when Power to the People is available";
-      var RELAY_SUBJECT   = "New sign-up for Power to the People";
       var ACTIVATION_MESSAGE = "Thank you. This form is still waiting for its one-time activation by the site owner, so your address has not been delivered yet. Please try again shortly, or email us at ";
 
       // Plain-English check: something @ something . something, no spaces.
@@ -906,6 +907,7 @@
       }
 
       function showThanks() {
+        clearError();
         form.hidden = true;
         thanks.hidden = false;
         thanks.focus();
@@ -933,17 +935,14 @@
         var url;
 
         if (FORM_ENDPOINT === "FORMSUBMIT") {
-          // FormSubmit relay: JSON in, JSON out, with the sign-up as the
-          // reply-to address so you can answer it straight from the inbox.
+          // Use our Vercel endpoint so a cross-origin browser failure cannot
+          // hide a successful relay response. The server checks acceptance.
           options.headers = { "Content-Type": "application/json", "Accept": "application/json" };
           options.body = JSON.stringify({
             email: value,
-            _subject: RELAY_SUBJECT,
-            _replyto: value,
-            _template: "table",
-            _captcha: "false"
+            "bot-field": ""
           });
-          url = "https://formsubmit.co/ajax/" + PUBLISHER_MAILBOX;
+          url = "/api/notify";
         } else if (FORM_ENDPOINT === "NETLIFY") {
           // Netlify Forms: post URL-encoded data back to this page.
           var body = new URLSearchParams();
@@ -974,19 +973,16 @@
           return response.text().then(function (text) {
             var result = null;
             try { result = JSON.parse(text); } catch (e) { /* not JSON */ }
-            if (window.console && console.info) console.info("Sign-up reply:", response.status, text.slice(0, 300));
             var message = (result && (result.message || result.error)) || "";
-            if (/activat/i.test(message)) {
+            if (result && result.ok === true && response.ok) return;
+            if ((result && result.code === "activation") || /activat/i.test(message)) {
               var pending = new Error(message);
               pending.code = "activation";
               throw pending;
             }
             if (!response.ok) throw new Error("Server responded " + response.status + (message ? ": " + message : ""));
             if (!result || type.indexOf("json") === -1) throw new Error("Unexpected reply (" + (type || "no content type") + ")");
-            if (FORM_ENDPOINT === "FORMSUBMIT") {
-              // FormSubmit answers {"success":"true"|"false","message":"..."}.
-              if (String(result.success) !== "true") throw new Error(message || "rejected");
-            } else if (result.ok !== true) {
+            if (result.ok !== true) {
               throw new Error(message || "rejected");
             }
           });

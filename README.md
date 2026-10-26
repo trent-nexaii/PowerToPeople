@@ -12,7 +12,8 @@ images/author.jpg   author portrait (portrait or square)
 images/share.jpg    the picture shown when the link is shared (made from the cover)
 robots.txt          tells search engines they may index the page
 sitemap.xml         lists the page and its pictures for search engines
-apps-script/Code.gs the small script that emails each sign-up to you (see section 2)
+api/notify.js       Vercel function that forwards sign-ups to FormSubmit
+apps-script/Code.gs optional Google Apps Script alternative (see section 2)
 README.md           this file
 ```
 
@@ -44,16 +45,16 @@ Nothing in `index.html` needs to change. Tips:
 
 ## 2. The email sign-up form
 
-Each sign-up is emailed to the address set in `index.html` (the `PUBLISHER_MAILBOX` line near the bottom, currently spinningplatespress@icloud.com). To send sign-ups somewhere else, change that line, written as two parts such as `["name", "example.com"]`, and publish the page again. The address is written in two parts so that robots scanning the page for email addresses do not pick it up.
+Each sign-up is emailed to spinningplatespress@icloud.com. For the default Vercel workflow, the recipient is fixed in `api/notify.js`. To change it, update that endpoint and the `PUBLISHER_MAILBOX` email fallback in `index.html`, then deploy again.
 
 The page can deliver sign-ups three ways. Option A is switched on and needs no account; the others are there if you want them later.
 
-### Option A — FormSubmit relay (switched on, nothing to install)
+### Option A — FormSubmit through Vercel (switched on, nothing to install)
 
-The page sends each sign-up to <https://formsubmit.co>, a free relay that forwards it as an email to the inbox above. There is no account to create.
+The browser posts to `/api/notify` on this website. That Vercel function forwards the address to <https://formsubmit.co>, a free email relay, and returns a confirmed success or error. This avoids browser cross-origin failures after an email has already been delivered. There is no account or API key to create. Deploy the whole repository to Vercel so both the page and `api/notify.js` are included; a static-only server cannot run this endpoint.
 
 1. Publish the page (section 3).
-2. Open the live page, enter your own email address in the form and press the button. "Thank you" appears.
+2. Open the live page, enter your own email address in the form and press the button. After activation, confirmed acceptance shows "Thank you for signing up!".
 3. **The first time only**, FormSubmit sends an email to the inbox with the subject "Activate your form" (check the junk folder). Open it and click the activation link. This is what tells FormSubmit the inbox owner agrees to receive the form.
 4. Submit the form once more. Within a minute an email with the subject "New sign-up for Power to the People" arrives, showing the address and a reply-to set to it. From now on every sign-up is delivered the same way.
 
@@ -62,7 +63,7 @@ If you change the inbox address later, FormSubmit sends a fresh activation email
 Notes:
 
 - FormSubmit's free service has no fixed cap on submissions and keeps no public list; each one is simply forwarded. If you want a spreadsheet of sign-ups as well, use option B, or make a Gmail filter that labels these messages.
-- If "Sorry, something went wrong" appears on the page, FormSubmit could not be reached or rejected the submission. The message includes an "email us" link so the visitor can still reach you. Try again in a minute; if it persists, switch to option B.
+- If "We couldn't confirm your sign-up" appears, the endpoint could not verify acceptance. An email may still have arrived if the response was lost; the endpoint does not retry automatically. Check the Vercel function status and FormSubmit inbox activation before retrying.
 - The page never pretends: "Thank you" appears only after FormSubmit confirms it accepted the submission.
 
 ### Option B — Google Sheet and script (private, keeps a list, about ten minutes)
@@ -140,7 +141,11 @@ Either way, the form already includes a hidden "honeypot" field that catches mos
 
 ## 3. Publishing the page
 
-The site is plain files, so any "static" host will do. Here are the two easiest.
+### Vercel (current hosting)
+
+Connect this GitHub repository to Vercel with `main` as the production branch. Use the **Other** framework preset, repository root as the root directory, and no build command or custom output directory. Vercel serves the static page and deploys `api/notify.js` automatically. Pushing to `main` triggers a new production deployment. No email secrets are needed for the FormSubmit relay.
+
+The page can also use the alternative hosts below, but their sign-up configuration must be changed: use option C for Netlify or option B for GitHub Pages. Neither runs the Vercel endpoint.
 
 ### Netlify (drag and drop, about five minutes)
 
@@ -164,6 +169,8 @@ The site is plain files, so any "static" host will do. Here are the two easiest.
 ---
 
 ## Checking the page before you share it
+
+Run `node --test tests/notify.test.cjs` to check relay acceptance, rejection, activation, invalid input and uncertain delivery without sending real emails. A plain static server can preview layout, but live sign-up testing requires the Vercel endpoint (or `vercel dev`).
 
 Open the page and look for these things:
 
